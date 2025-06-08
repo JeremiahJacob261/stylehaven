@@ -9,9 +9,6 @@
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-  --font-poppins: var(--font-poppins);
   --font-noto-serif: "Noto Serif", serif;
   --font-command: "Cormorant Garamond", serif;
   --color-sidebar-ring: var(--sidebar-ring);
