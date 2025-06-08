@@ -15,6 +15,11 @@ import { GrailedReceiptForm } from "@/components/receipts/GrailedReceiptForm";
 import { LVReceiptForm } from "@/components/receipts/LVReceiptForm";
 import { MonclerReceiptForm } from "@/components/receipts/MonclerReceiptForm";
 import { NorthFaceReceiptForm } from "@/components/receipts/NorthFaceReceiptForm";
+import { SupremeReceiptForm } from "@/components/receipts/SupremeReceiptForm";
+import { TrapstarReceiptForm } from "@/components/receipts/TrapstarReceiptForm";
+import { StussyReceiptForm } from "@/components/receipts/StussyReceiptForm";
+import { YzyGapReceiptForm } from "@/components/receipts/YzyGapReceiptForm";
+import { StockXReceiptForm } from "@/components/receipts/StockXReceiptForm";
 import { 
   AppleReceiptData, 
   BalenciagaReceiptData, 
@@ -28,13 +33,40 @@ import {
   LVReceiptData,
   MonclerReceiptData,
   NorthFaceReceiptData,
+  SupremeReceiptData,
+  TrapstarReceiptData,
+  StussyReceiptData,
+  YzyGapReceiptData,
+  StockXReceiptData,
   ReceiptType 
 } from "@/types/receipt-types";
 
 export default function Home() {
   const router = useRouter();
   const [selectedReceiptType, setSelectedReceiptType] = useState<ReceiptType>('apple');
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   
+  // Receipt type options with labels and categories
+  const receiptTypes = [
+    { value: 'apple', label: 'Apple', category: 'Tech', icon: '🍎' },
+    { value: 'nike', label: 'Nike', category: 'Sneakers', icon: '✓' },
+    { value: 'goat', label: 'GOAT', category: 'Sneakers', icon: '🐐' },
+    { value: 'stockx', label: 'StockX', category: 'Sneakers', icon: '📈' },
+    { value: 'balenciaga', label: 'Balenciaga', category: 'Luxury', icon: '👑' },
+    { value: 'dior', label: 'Dior', category: 'Luxury', icon: '💎' },
+    { value: 'lv', label: 'Louis Vuitton', category: 'Luxury', icon: '🛍️' },
+    { value: 'moncler', label: 'Moncler', category: 'Luxury', icon: '🧥' },
+    { value: 'farfetch', label: 'Farfetch', category: 'Fashion', icon: '🌟' },
+    { value: 'bape', label: 'BAPE', category: 'Streetwear', icon: '🦍' },
+    { value: 'supreme', label: 'Supreme', category: 'Streetwear', icon: '🔴' },
+    { value: 'trapstar', label: 'Trapstar', category: 'Streetwear', icon: '⭐' },
+    { value: 'stussy', label: 'Stüssy', category: 'Streetwear', icon: '🌊' },
+    { value: 'yzygap', label: 'YZY GAP', category: 'Streetwear', icon: '🎨' },
+    { value: 'gallery_dept', label: 'Gallery Dept', category: 'Streetwear', icon: '🎭' },
+    { value: 'northface', label: 'North Face', category: 'Outdoor', icon: '⛰️' },
+    { value: 'grailed', label: 'Grailed', category: 'Marketplace', icon: '🔥' },
+  ] as const;
+
   const [appleReceiptData, setAppleReceiptData] = useState<AppleReceiptData>({
     ORDER_NUMBER: "W1234567890",
     ORDER_DATE: "30 November 2024",
@@ -289,6 +321,157 @@ export default function Home() {
     SHIPPING_METHOD: "DHL - Standard delivery"
   });
 
+  const [supremeReceiptData, setSupremeReceiptData] = useState<SupremeReceiptData>({
+    ORDER_NUMBER: "SUP123456789",
+    ORDER_DATE: "December 1, 2024",
+    CUSTOMER_NAME: "John Doe",
+    CUSTOMER_EMAIL: "john.doe@example.com",
+    PRODUCT_IMAGE: "/supreme/supreme_files/product-image.jpg",
+    PRODUCT_NAME: "Supreme Box Logo Hoodie",
+    PRODUCT_SIZE: "Large",
+    PRODUCT_COLOR: "Red",
+    PRODUCT_PRICE: "$158.00",
+    QUANTITY: "1",
+    SUBTOTAL: "$158.00",
+    SHIPPING_COST: "$10.00",
+    TAX_AMOUNT: "$15.80",
+    TOTAL_AMOUNT: "$183.80",
+    SHIPPING_ADDRESS_1: "John Doe",
+    SHIPPING_ADDRESS_2: "123 Main Street",
+    SHIPPING_ADDRESS_3: "New York, NY 10001",
+    SHIPPING_ADDRESS_4: "United States",
+    PAYMENT_METHOD: "Visa",
+    CARD_ENDING: "1234"
+  });
+
+  const [trapstarReceiptData, setTrapstarReceiptData] = useState<TrapstarReceiptData>({
+    ORDER_NUMBER: "TS123456789",
+    ORDER_DATE: "December 1, 2024",
+    CUSTOMER_NAME: "John Doe",
+    CUSTOMER_EMAIL: "john.doe@example.com",
+    PRODUCT_IMAGE: "/trapstar/trapstar_files/product-image.jpg",
+    PRODUCT_NAME: "Trapstar Hoodie",
+    PRODUCT_SIZE: "Large",
+    PRODUCT_COLOR: "Black",
+    PRODUCT_PRICE: "£120.00",
+    QUANTITY: "1",
+    SUBTOTAL: "£120.00",
+    SHIPPING_COST: "£5.00",
+    TAX_AMOUNT: "£20.00",
+    TOTAL_AMOUNT: "£125.00",
+    SHIPPING_ADDRESS_1: "John Doe",
+    SHIPPING_ADDRESS_2: "123 Main Street",
+    SHIPPING_ADDRESS_3: "London W1K 5AB",
+    SHIPPING_ADDRESS_4: "United Kingdom",
+    PAYMENT_METHOD: "Visa",
+    CARD_ENDING: "1234"
+  });
+
+  const [stussyReceiptData, setStussyReceiptData] = useState<StussyReceiptData>({
+    ORDER_NUMBER: "STU123456789",
+    ORDER_DATE: "December 1, 2024",
+    CUSTOMER_NAME: "John Doe",
+    CUSTOMER_EMAIL: "john.doe@example.com",
+    PRODUCT_IMAGE: "/stussy/stussy_files/product-image.jpg",
+    PRODUCT_NAME: "Stussy 8 Ball Tee",
+    PRODUCT_SIZE: "L",
+    PRODUCT_COLOR: "Black",
+    PRODUCT_PRICE: "$50.00",
+    QUANTITY: "1",
+    SUBTOTAL: "$50.00",
+    SHIPPING_COST: "$10.00",
+    TAX_AMOUNT: "$5.00",
+    TOTAL_AMOUNT: "$65.00",
+    SHIPPING_ADDRESS_1: "John Doe",
+    SHIPPING_ADDRESS_2: "123 Main Street",
+    SHIPPING_ADDRESS_3: "Los Angeles, CA 90001",
+    SHIPPING_ADDRESS_4: "United States",
+    PAYMENT_METHOD: "Visa",
+    CARD_ENDING: "1234"
+  });
+
+  const [yzygapReceiptData, setYzyGapReceiptData] = useState<YzyGapReceiptData>({
+    ORDER_NUMBER: "YZY123456789",
+    ORDER_DATE: "December 1, 2024",
+    CUSTOMER_NAME: "John Doe",
+    CUSTOMER_EMAIL: "john.doe@example.com",
+    PRODUCT_IMAGE: "/yzygap/yzygap_files/product-image.jpg",
+    PRODUCT_NAME: "YZY GAP Hoodie",
+    PRODUCT_SIZE: "M",
+    PRODUCT_COLOR: "Blue",
+    PRODUCT_PRICE: "$120.00",
+    QUANTITY: "1",
+    SUBTOTAL: "$120.00",
+    SHIPPING_COST: "$15.00",
+    TAX_AMOUNT: "$10.00",
+    TOTAL_AMOUNT: "$145.00",
+    SHIPPING_ADDRESS_1: "John Doe",
+    SHIPPING_ADDRESS_2: "123 Main Street",
+    SHIPPING_ADDRESS_3: "Chicago, IL 60601",
+    SHIPPING_ADDRESS_4: "United States",
+    PAYMENT_METHOD: "Mastercard",
+    CARD_ENDING: "5678"
+  });
+
+  const [stockxReceiptData, setStockxReceiptData] = useState<StockXReceiptData>({
+    ORDER_NUMBER: "STX123456789",
+    ORDER_DATE: "December 1, 2024",
+    CUSTOMER_NAME: "John Doe",
+    CUSTOMER_EMAIL: "john.doe@example.com",
+    PRODUCT_IMAGE: "/stockx/stockx_files/product-image.jpg",
+    PRODUCT_NAME: "Air Jordan 1 Retro High OG",
+    PRODUCT_SIZE: "US 10",
+    PRODUCT_PRICE: "$285.00",
+    SHIPPING_COST: "$13.95",
+    TAX_AMOUNT: "$25.00",
+    TOTAL_AMOUNT: "$323.95",
+    TRACKING_NUMBER: "1Z999AA1234567890",
+    ESTIMATED_DELIVERY: "December 5, 2024",
+    SHIPPING_ADDRESS_1: "John Doe",
+    SHIPPING_ADDRESS_2: "123 Main Street",
+    SHIPPING_ADDRESS_3: "New York, NY 10001",
+    SHIPPING_ADDRESS_4: "United States",
+    PAYMENT_METHOD: "Visa",
+    CARD_ENDING: "1234",
+    ORDER_STATUS: "ordered"
+  });
+
+  // Utility functions for quick actions
+  const generateOrderNumber = (prefix: string) => {
+    const timestamp = Date.now().toString().slice(-6);
+    const random = Math.floor(Math.random() * 1000).toString().padStart(3, '0');
+    return `${prefix}${timestamp}${random}`;
+  };
+
+  const getTodayDate = () => {
+    return new Date().toLocaleDateString('en-GB', {
+      day: 'numeric',
+      month: 'long',
+      year: 'numeric'
+    });
+  };
+
+  const getDeliveryDate = (daysAhead: number = 3) => {
+    const date = new Date();
+    date.setDate(date.getDate() + daysAhead);
+    return date.toLocaleDateString('en-GB', {
+      weekday: 'long',
+      day: 'numeric',
+      month: 'long',
+      year: 'numeric'
+    });
+  };
+
+  const generateTrackingNumber = () => {
+    const prefix = '1Z999AA';
+    const numbers = Math.floor(Math.random() * 1000000000).toString().padStart(9, '0');
+    return `${prefix}${numbers}`;
+  };
+
+  const generateRandomCard = () => {
+    return Math.floor(Math.random() * 9000 + 1000).toString();
+  };
+
   // Input change handlers
   const handleAppleInputChange = (field: keyof AppleReceiptData, value: string) => {
     setAppleReceiptData(prev => ({ ...prev, [field]: value }));
@@ -337,6 +520,21 @@ const handleLVInputChange = (field: keyof LVReceiptData, value: string) => {
   const handleNorthFaceInputChange = (field: keyof NorthFaceReceiptData, value: string) => {
     setNorthFaceReceiptData(prev => ({ ...prev, [field]: value }));
   };
+
+  const handleSupremeInputChange = (field: keyof SupremeReceiptData, value: string) => {
+    setSupremeReceiptData(prev => ({ ...prev, [field]: value }));
+  };
+
+  const handleTrapstarInputChange = (field: keyof TrapstarReceiptData, value: string) => {
+    setTrapstarReceiptData(prev => ({ ...prev, [field]: value }));
+  };
+
+  const handleStussyInputChange = (field: keyof StussyReceiptData, value: string) => {
+    setStussyReceiptData(prev => ({ ...prev, [field]: value }));
+  };
+const handleYzyGapInputChange = (field: keyof YzyGapReceiptData, value: string) => {
+  setYzyGapReceiptData(prev => ({ ...prev, [field]: value }));
+};
 
   const calculateAppleTotal = () => {
     const price = parseFloat(appleReceiptData.PRODUCT_PRICE.replace(/[£$,€]/g, ''));
@@ -387,6 +585,21 @@ const handleLVInputChange = (field: keyof LVReceiptData, value: string) => {
     } else if (selectedReceiptType === 'northface') {
       localStorage.setItem('northfaceReceiptData', JSON.stringify(northFaceReceiptData));
       router.push('/northface-receipt');
+    } else if (selectedReceiptType === 'supreme') {
+      localStorage.setItem('supremeReceiptData', JSON.stringify(supremeReceiptData));
+      router.push('/supreme-receipt');
+    } else if (selectedReceiptType === 'trapstar') {
+      localStorage.setItem('trapstarReceiptData', JSON.stringify(trapstarReceiptData));
+      router.push('/trapstar-receipt');
+    } else if (selectedReceiptType === 'stussy') {
+      localStorage.setItem('stussyReceiptData', JSON.stringify(stussyReceiptData));
+      router.push('/stussy-receipt');
+    } else if (selectedReceiptType === 'yzygap') {
+      localStorage.setItem('yzygapReceiptData', JSON.stringify(yzygapReceiptData));
+      router.push('/yzygap-receipt');
+    } else if (selectedReceiptType === 'stockx') {
+      localStorage.setItem('stockxReceiptData', JSON.stringify(stockxReceiptData));
+      router.push('/stockx-receipt');
     }
   };
 
@@ -441,6 +654,14 @@ const handleLVInputChange = (field: keyof LVReceiptData, value: string) => {
         return (
           <img src="/northface/northface_files/northface-logo.png" alt="The North Face" className="w-12 h-12 object-contain" />
         );
+      case 'supreme':
+        return (
+          <div className="text-red-600 font-black text-lg">SUP</div>
+        );
+      case 'trapstar':
+        return (
+          <div className="text-red-500 font-black text-lg">TS</div>
+        );
       default:
         return (
           <svg className="w-12 h-12 text-white" viewBox="0 0 24 24" fill="currentColor">
@@ -448,6 +669,337 @@ const handleLVInputChange = (field: keyof LVReceiptData, value: string) => {
           </svg>
         );
     }
+  };
+
+  const selectedReceiptInfo = receiptTypes.find(type => type.value === selectedReceiptType);
+
+  const renderMobileDropdown = () => (
+    <div className="relative w-full">
+      <button
+        onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+        className="w-full bg-white border border-gray-300 rounded-lg px-4 py-3 text-left flex items-center justify-between shadow-sm hover:border-gray-400 transition-colors"
+      >
+        <div className="flex items-center space-x-3">
+          <span className="text-xl">{selectedReceiptInfo?.icon}</span>
+          <div>
+            <div className="font-medium text-gray-900">{selectedReceiptInfo?.label}</div>
+            <div className="text-xs text-gray-500">{selectedReceiptInfo?.category}</div>
+          </div>
+        </div>
+        <svg className={`w-5 h-5 text-gray-400 transition-transform ${isDropdownOpen ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+        </svg>
+      </button>
+      
+      {isDropdownOpen && (
+        <div className="absolute top-full left-0 right-0 mt-2 bg-white border border-gray-200 rounded-lg shadow-lg z-50 max-h-80 overflow-y-auto">
+          {Object.entries(
+            receiptTypes.reduce((acc, type) => {
+              if (!acc[type.category]) acc[type.category] = [];
+              acc[type.category].push(type);
+              return acc;
+            }, {} as Record<string, typeof receiptTypes>)
+          ).map(([category, types]) => (
+            <div key={category}>
+              <div className="px-4 py-2 text-xs font-semibold text-gray-500 uppercase tracking-wide bg-gray-50">
+                {category}
+              </div>
+              {types.map((type) => (
+                <button
+                  key={type.value}
+                  onClick={() => {
+                    setSelectedReceiptType(type.value as ReceiptType);
+                    setIsDropdownOpen(false);
+                  }}
+                  className={`w-full px-4 py-3 text-left flex items-center space-x-3 hover:bg-gray-50 transition-colors ${
+                    selectedReceiptType === type.value ? 'bg-blue-50 border-r-2 border-blue-500' : ''
+                  }`}
+                >
+                  <span className="text-lg">{type.icon}</span>
+                  <span className="font-medium text-gray-900">{type.label}</span>
+                </button>
+              ))}
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+
+  const renderDesktopTabs = () => (
+    <div className="bg-white rounded-lg p-2 shadow-md overflow-x-auto">
+      <div className="flex space-x-1 min-w-max">
+        {receiptTypes.map((type) => (
+          <button
+            key={type.value}
+            onClick={() => setSelectedReceiptType(type.value as ReceiptType)}
+            className={`px-3 py-2 sm:px-4 sm:py-3 rounded-md font-medium transition-all text-xs sm:text-sm whitespace-nowrap flex items-center space-x-2 ${
+              selectedReceiptType === type.value
+                ? 'bg-gray-900 text-white shadow-md'
+                : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
+            }`}
+          >
+            <span className="text-sm">{type.icon}</span>
+            <span>{type.label}</span>
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+
+  // Enhanced quick actions for different receipt types
+  const getQuickActions = () => {
+    const commonActions = [
+      {
+        label: "Use Today's Date",
+        icon: "📅",
+        action: () => {
+          const today = getTodayDate();
+          switch (selectedReceiptType) {
+            case 'apple':
+              setAppleReceiptData(prev => ({ ...prev, ORDER_DATE: today }));
+              break;
+            case 'nike':
+              setNikeReceiptData(prev => ({ ...prev, ORDER_DATE: today }));
+              break;
+            case 'dior':
+              setDiorReceiptData(prev => ({ ...prev, ORDER_DATE: today }));
+              break;
+            case 'goat':
+              setGoatReceiptData(prev => ({ ...prev, ORDER_DATE: today }));
+              break;
+            case 'stockx':
+              setStockxReceiptData(prev => ({ ...prev, ORDER_DATE: today }));
+              break;
+            // Add more cases as needed
+          }
+        }
+      },
+      {
+        label: "Generate Order Number",
+        icon: "🔢",
+        action: () => {
+          const prefixMap: Record<string, string> = {
+            apple: 'W',
+            nike: 'N',
+            dior: '',
+            goat: 'GOAT',
+            stockx: 'STX',
+            balenciaga: 'BAL',
+            bape: 'BAPEUK',
+            supreme: 'SUP',
+            trapstar: 'TS',
+            stussy: 'STU',
+            yzygap: 'YZY',
+            lv: 'LV',
+            moncler: 'MCL',
+            northface: '',
+            farfetch: 'FF',
+            gallery_dept: 'GD',
+            grailed: 'GR'
+          };
+          
+          const prefix = prefixMap[selectedReceiptType] || '';
+          const orderNumber = generateOrderNumber(prefix);
+          
+          switch (selectedReceiptType) {
+            case 'apple':
+              setAppleReceiptData(prev => ({ ...prev, ORDER_NUMBER: orderNumber }));
+              break;
+            case 'nike':
+              setNikeReceiptData(prev => ({ ...prev, ORDER_NUMBER: orderNumber }));
+              break;
+            case 'dior':
+              setDiorReceiptData(prev => ({ ...prev, ORDER_NUMBER: orderNumber }));
+              break;
+            case 'goat':
+              setGoatReceiptData(prev => ({ ...prev, ORDER_NUMBER: orderNumber }));
+              break;
+            case 'stockx':
+              setStockxReceiptData(prev => ({ ...prev, ORDER_NUMBER: orderNumber }));
+              break;
+            // Add more cases
+          }
+        }
+      },
+      {
+        label: "Generate Tracking",
+        icon: "📦",
+        action: () => {
+          const tracking = generateTrackingNumber();
+          switch (selectedReceiptType) {
+            case 'goat':
+              setGoatReceiptData(prev => ({ ...prev, TRACKING_NUMBER: tracking }));
+              break;
+            case 'stockx':
+              setStockxReceiptData(prev => ({ ...prev, TRACKING_NUMBER: tracking }));
+              break;
+            case 'gallery_dept':
+              setGalleryDeptReceiptData(prev => ({ ...prev, TRACKING_NUMBER: tracking }));
+              break;
+          }
+        }
+      },
+      {
+        label: "Set Delivery Date",
+        icon: "🚚",
+        action: () => {
+          const deliveryDate = getDeliveryDate();
+          switch (selectedReceiptType) {
+            case 'nike':
+              setNikeReceiptData(prev => ({ ...prev, DELIVERY_DATE: deliveryDate }));
+              break;
+            case 'goat':
+              setGoatReceiptData(prev => ({ ...prev, ESTIMATED_DELIVERY: deliveryDate }));
+              break;
+            case 'stockx':
+              setStockxReceiptData(prev => ({ ...prev, ESTIMATED_DELIVERY: deliveryDate }));
+              break;
+            case 'farfetch':
+              setFarfetchReceiptData(prev => ({ ...prev, DELIVERY: deliveryDate }));
+              break;
+          }
+        }
+      },
+      {
+        label: "Random Card Ending",
+        icon: "💳",
+        action: () => {
+          const cardEnding = generateRandomCard();
+          switch (selectedReceiptType) {
+            case 'bape':
+              setBapeReceiptData(prev => ({ ...prev, CARD_ENDING: cardEnding }));
+              break;
+            case 'dior':
+              setDiorReceiptData(prev => ({ ...prev, CARD_ENDING: cardEnding }));
+              break;
+            case 'nike':
+              setNikeReceiptData(prev => ({ ...prev, CARD_END: cardEnding }));
+              break;
+            case 'stockx':
+              setStockxReceiptData(prev => ({ ...prev, CARD_ENDING: cardEnding }));
+              break;
+            case 'moncler':
+              setMonclerReceiptData(prev => ({ ...prev, CARD_ENDING: cardEnding }));
+              break;
+            case 'supreme':
+              setSupremeReceiptData(prev => ({ ...prev, CARD_ENDING: cardEnding }));
+              break;
+            case 'trapstar':
+              setTrapstarReceiptData(prev => ({ ...prev, CARD_ENDING: cardEnding }));
+              break;
+            case 'stussy':
+              setStussyReceiptData(prev => ({ ...prev, CARD_ENDING: cardEnding }));
+              break;
+            case 'yzygap':
+              setYzyGapReceiptData(prev => ({ ...prev, CARD_ENDING: cardEnding }));
+              break;
+            case 'farfetch':
+              setFarfetchReceiptData(prev => ({ ...prev, CARD_ENDING: cardEnding }));
+              break;
+          }
+        }
+      }
+    ];
+
+    const specificActions = [];
+
+    // Add specific actions based on receipt type
+    switch (selectedReceiptType) {
+      case 'apple':
+        specificActions.push({
+          label: "Calculate Total",
+          icon: "🧮",
+          action: () => {
+            const price = parseFloat(appleReceiptData.PRODUCT_PRICE.replace(/[£$,€]/g, ''));
+            const shipping = appleReceiptData.SHIPPING_COST.toLowerCase() === 'free' ? 0 : parseFloat(appleReceiptData.SHIPPING_COST.replace(/[£$,€]/g, ''));
+            const total = price + shipping;
+            setAppleReceiptData(prev => ({ ...prev, ORDER_TOTAL: `£${total.toFixed(2)}` }));
+          }
+        });
+        break;
+
+      case 'stockx':
+        specificActions.push(
+          {
+            label: "Calculate Total",
+            icon: "🧮",
+            action: () => {
+              const price = parseFloat(stockxReceiptData.PRODUCT_PRICE.replace(/[£$,€]/g, ''));
+              const shipping = parseFloat(stockxReceiptData.SHIPPING_COST.replace(/[£$,€]/g, ''));
+              const tax = parseFloat(stockxReceiptData.TAX_AMOUNT.replace(/[£$,€]/g, ''));
+              const total = price + shipping + tax;
+              setStockxReceiptData(prev => ({ ...prev, TOTAL_AMOUNT: `$${total.toFixed(2)}` }));
+            }
+          },
+          {
+            label: "Toggle Status",
+            icon: "🔄",
+            action: () => {
+              setStockxReceiptData(prev => ({ 
+                ...prev, 
+                ORDER_STATUS: prev.ORDER_STATUS === 'ordered' ? 'verified' : 'ordered' 
+              }));
+            }
+          }
+        );
+        break;
+
+      case 'nike':
+        specificActions.push({
+          label: "Sync Price & Total",
+          icon: "💰",
+          action: () => {
+            setNikeReceiptData(prev => ({ ...prev, TOTAL: prev.PRICE }));
+          }
+        });
+        break;
+
+      case 'goat':
+      case 'gallery_dept':
+        specificActions.push({
+          label: "Calculate Total",
+          icon: "🧮",
+          action: () => {
+            if (selectedReceiptType === 'goat') {
+              const price = parseFloat(goatReceiptData.PRODUCT_PRICE.replace(/[£$,€]/g, ''));
+              const shipping = parseFloat(goatReceiptData.SHIPPING_COST.replace(/[£$,€]/g, ''));
+              const tax = parseFloat(goatReceiptData.TAX_AMOUNT.replace(/[£$,€]/g, ''));
+              const total = price + shipping + tax;
+              setGoatReceiptData(prev => ({ ...prev, TOTAL_AMOUNT: `$${total.toFixed(2)}` }));
+            }
+          }
+        });
+        break;
+
+      case 'bape':
+        specificActions.push({
+          label: "Calculate Total",
+          icon: "🧮",
+          action: () => {
+            const price = parseFloat(bapeReceiptData.PRODUCT_PRICE.replace(/[£$,€]/g, ''));
+            const shipping = parseFloat(bapeReceiptData.SHIPPING_COST.replace(/[£$,€]/g, ''));
+            const total = price + shipping;
+            setBapeReceiptData(prev => ({ ...prev, ORDER_TOTAL_CURRENCY: `£${total.toFixed(2)} GBP` }));
+          }
+        });
+        break;
+
+      case 'grailed':
+        specificActions.push({
+          label: "Calculate Total",
+          icon: "🧮",
+          action: () => {
+            const soldPrice = parseFloat(grailedReceiptData.SOLD_PRICE.replace(/[£$,€]/g, ''));
+            const tax = parseFloat(grailedReceiptData.TAX_AMOUNT.replace(/[£$,€]/g, ''));
+            const total = soldPrice + tax;
+            setGrailedReceiptData(prev => ({ ...prev, TOTAL_AMOUNT: `€${total.toFixed(2)}` }));
+          }
+        });
+        break;
+    }
+
+    return [...commonActions, ...specificActions];
   };
 
   const renderReceiptForm = () => {
@@ -536,6 +1088,43 @@ const handleLVInputChange = (field: keyof LVReceiptData, value: string) => {
             onInputChange={handleNorthFaceInputChange} 
           />
         );
+      case 'supreme':
+        return (
+          <SupremeReceiptForm 
+            data={supremeReceiptData} 
+            onInputChange={handleSupremeInputChange} 
+          />
+        );
+      case 'trapstar':
+        return (
+          <TrapstarReceiptForm 
+            data={trapstarReceiptData} 
+            onInputChange={handleTrapstarInputChange} 
+          />
+        );
+      case 'stussy':
+        return (
+          <StussyReceiptForm 
+            data={stussyReceiptData} 
+            onInputChange={handleStussyInputChange} 
+          />
+        );
+      case 'yzygap':
+        return (
+          <YzyGapReceiptForm 
+            data={yzygapReceiptData} 
+            onInputChange={handleYzyGapInputChange} 
+          />
+        );
+      case 'stockx':
+        return (
+          <StockXReceiptForm
+            data={stockxReceiptData}
+            onInputChange={(field, value) => {
+              setStockxReceiptData(prev => ({ ...prev, [field]: value }));
+            }}
+          />
+        );
       default:
         return <div>Select a receipt type</div>;
     }
@@ -545,236 +1134,97 @@ const handleLVInputChange = (field: keyof LVReceiptData, value: string) => {
     <div className="w-full bg-gradient-to-br from-gray-50 to-gray-100 min-h-screen p-4 sm:p-8">
       <div className="max-w-6xl mx-auto">
         {/* Header */}
-        <div className="text-center mb-12">
-          <div className="flex justify-center items-center mb-6">
-            <div className="w-16 h-16 bg-black rounded-2xl flex items-center justify-center">
-              <svg className="w-10 h-10 text-white" viewBox="0 0 24 24" fill="currentColor">
-                <path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.81-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"/>
-              </svg>
+        <div className="text-center mb-8 sm:mb-12">
+            <div className="flex justify-center items-center mb-4 sm:mb-6">
+            <div className="w-12 h-12 sm:w-16 sm:h-16 rounded-2xl overflow-hidden">
+              <img src="/natetube.jpg" alt="NateTube" className="w-full h-full object-cover" />
             </div>
-          </div>
-          <h1 className="text-4xl font-bold text-gray-900 mb-2">StyleHaaven Receipt Generator</h1>
-          <p className="text-lg text-gray-600">Create authentic-looking receipts with custom details</p>
+            </div>
+          <h1 className="text-2xl sm:text-4xl font-bold text-gray-900 mb-2">NateTube Receipt Generator</h1>
+          <p className="text-sm sm:text-lg text-gray-600">Generate receipts to match your wins</p>
         </div>
 
         {/* Receipt Type Selector */}
-        <div className="flex justify-center mb-8">
-          <div className="bg-white rounded-lg p-2 shadow-md">
-            <div className="flex space-x-1 sm:space-x-2">
-              {(['apple', 'balenciaga', 'bape', 'dior', 'nike', 'goat', 'farfetch', 'gallery_dept', 'grailed', 'lv', 'moncler', 'northface'] as ReceiptType[]).map((type) => (
-                <button
-                  key={type}
-                  onClick={() => setSelectedReceiptType(type)}
-                  className={`px-4 py-2 sm:px-6 sm:py-3 rounded-md font-medium transition-all text-xs sm:text-sm ${
-                    selectedReceiptType === type
-                      ? 'bg-gray-900 text-white shadow-md'
-                      : 'text-gray-600 hover:text-gray-900'
-                  }`}
-                >
-                  <span className="capitalize">{type === 'northface' ? 'North Face' : type}</span>
-                </button>
-              ))}
-            </div>
+        <div className="flex justify-center mb-6 sm:mb-8">
+          {/* Mobile Dropdown (visible on small screens) */}
+          <div className="block sm:hidden w-full max-w-md px-4">
+            {renderMobileDropdown()}
+          </div>
+          
+          {/* Desktop Tabs (visible on larger screens) */}
+          <div className="hidden sm:block w-full">
+            {renderDesktopTabs()}
           </div>
         </div>
 
         {/* Main Content */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-8">
           
           {/* Form Section */}
-          <div className="bg-white rounded-2xl shadow-lg p-8">
-            <h2 className="text-2xl font-bold text-gray-900 mb-6 flex items-center">
-              <svg className="w-6 h-6 mr-2 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <div className="bg-white rounded-2xl shadow-lg p-6 sm:p-8">
+            <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-4 sm:mb-6 flex items-center">
+              <svg className="w-5 h-5 sm:w-6 sm:h-6 mr-2 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
               </svg>
-              {selectedReceiptType === 'northface' ? 'North Face' : selectedReceiptType.charAt(0).toUpperCase() + selectedReceiptType.slice(1)} Receipt Details
+              <span className="text-sm sm:text-xl">{selectedReceiptInfo?.label} Receipt Details</span>
             </h2>
             
             {renderReceiptForm()}
           </div>
 
           {/* Preview/Action Section */}
-          <div className="space-y-6">
-            <div className="bg-white rounded-2xl shadow-lg p-8">
+          <div className="space-y-4 sm:space-y-6">
+            <div className="bg-white rounded-2xl shadow-lg p-6 sm:p-8">
               <div className="text-center">
-                <div className="w-20 h-20 bg-gradient-to-br from-gray-800 to-black rounded-3xl mx-auto mb-4 flex items-center justify-center shadow-lg">
-                  {getBrandIcon(selectedReceiptType)}
+                <div className="w-16 h-16 sm:w-20 sm:h-20 bg-gradient-to-br from-gray-800 to-black rounded-3xl mx-auto mb-4 flex items-center justify-center shadow-lg">
+                  <span className="text-2xl sm:text-3xl">{selectedReceiptInfo?.icon}</span>
                 </div>
-                <h3 className="text-2xl font-semibold text-gray-900 mb-2">
-                  {selectedReceiptType === 'northface' ? 'North Face' : selectedReceiptType.charAt(0).toUpperCase() + selectedReceiptType.slice(1)} Receipt
+                <h3 className="text-xl sm:text-2xl font-semibold text-gray-900 mb-2">
+                  {selectedReceiptInfo?.label} Receipt
                 </h3>
-                <p className="text-gray-600 mb-6">
-                  Generate a {selectedReceiptType === 'northface' ? 'North Face' : selectedReceiptType} order confirmation.
+                <p className="text-sm sm:text-base text-gray-600 mb-4 sm:mb-6">
+                  Generate a {selectedReceiptInfo?.label} order confirmation.
                 </p>
                 
                 <Button
                   onClick={generateReceipt}
-                  className="w-full bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-semibold py-3 px-6 rounded-lg shadow-lg transform transition hover:scale-105"
+                  className="w-full bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-semibold py-2 sm:py-3 px-4 sm:px-6 rounded-lg shadow-lg transform transition hover:scale-105 text-sm sm:text-base"
                 >
-                  <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg className="w-4 h-4 sm:w-5 sm:h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                   </svg>
-                  Generate {selectedReceiptType === 'northface' ? 'North Face' : selectedReceiptType.charAt(0).toUpperCase() + selectedReceiptType.slice(1)} Receipt
+                  Generate {selectedReceiptInfo?.label} Receipt
                 </Button>
               </div>
             </div>
 
-            {/* Quick Actions */}
-            <div className="bg-white rounded-2xl shadow-lg p-8">
-              <h3 className="text-lg font-semibold text-gray-900 mb-4">Quick Actions</h3>
-              <div className="space-y-3">
-                {selectedReceiptType === 'apple' && (
+            {/* Enhanced Quick Actions */}
+            <div className="bg-white rounded-2xl shadow-lg p-6 sm:p-8">
+              <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+                <svg className="w-5 h-5 mr-2 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                </svg>
+                Quick Actions
+              </h3>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-3">
+                {getQuickActions().map((action, index) => (
                   <Button
-                    onClick={updateAppleTotal}
+                    key={index}
+                    onClick={action.action}
                     variant="outline"
-                    className="w-full justify-start"
+                    className="justify-start h-auto py-2 sm:py-3 px-3 sm:px-4 text-left group hover:border-purple-300 hover:bg-purple-50 transition-all"
                   >
-                    <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 01-2-2V5a2 2 0 012-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
-                    </svg>
-                    Calculate Total
+                    <span className="text-lg mr-2 group-hover:scale-110 transition-transform">{action.icon}</span>
+                    <span className="text-xs sm:text-sm font-medium">{action.label}</span>
                   </Button>
-                )}
-                {selectedReceiptType === 'dior' && (
-                  <Button
-                    onClick={() => {
-                      setDiorReceiptData(prev => ({ ...prev, SUBTOTAL: prev.PRODUCT_PRICE, TOTAL_AMOUNT: prev.PRODUCT_PRICE }));
-                    }}
-                    variant="outline"
-                    className="w-full justify-start"
-                  >
-                    <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 01-2-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
-                    </svg>
-                    Sync Pricing
-                  </Button>
-                )}
-                {selectedReceiptType === 'bape' && (
-                  <Button
-                    onClick={() => {
-                      const price = parseFloat(bapeReceiptData.PRODUCT_PRICE.replace(/[£$,€]/g, ''));
-                      const shipping = parseFloat(bapeReceiptData.SHIPPING_COST.replace(/[£$,€]/g, ''));
-                      const total = price + shipping;
-                      setBapeReceiptData(prev => ({ ...prev, ORDER_TOTAL_CURRENCY: `£${total.toFixed(2)} GBP` }));
-                    }}
-                    variant="outline"
-                    className="w-full justify-start"
-                  >
-                    <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
-                    </svg>
-                    Calculate Total
-                  </Button>
-                )}
-                {selectedReceiptType === 'goat' && (
-                  <Button
-                    onClick={() => {
-                      const price = parseFloat(goatReceiptData.PRODUCT_PRICE.replace(/[£$,€]/g, ''));
-                      const shipping = parseFloat(goatReceiptData.SHIPPING_COST.replace(/[£$,€]/g, ''));
-                      const tax = parseFloat(goatReceiptData.TAX_AMOUNT.replace(/[£$,€]/g, ''));
-                      const total = price + shipping + tax;
-                      setGoatReceiptData(prev => ({ ...prev, TOTAL_AMOUNT: `$${total.toFixed(2)}` }));
-                    }}
-                    variant="outline"
-                    className="w-full justify-start"
-                  >
-                    <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
-                    </svg>
-                    Calculate Total
-                  </Button>
-                )}
-                {selectedReceiptType === 'farfetch' && (
-                  <Button
-                    onClick={() => {
-                      setFarfetchReceiptData(prev => ({ ...prev, TOTAL_AMOUNT: prev.PRODUCT_PRICE }));
-                    }}
-                    variant="outline"
-                    className="w-full justify-start"
-                  >
-                    <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
-                    </svg>
-                    Sync Pricing
-                  </Button>
-                )}
-                {selectedReceiptType === 'gallery_dept' && (
-                  <Button
-                    onClick={() => {
-                      const price = parseFloat(galleryDeptReceiptData.PRODUCT_PRICE.replace(/[£$,€]/g, ''));
-                      const shipping = parseFloat(galleryDeptReceiptData.SHIPPING_COST.replace(/[£$,€]/g, ''));
-                      const tax = parseFloat(galleryDeptReceiptData.TAX_AMOUNT.replace(/[£$,€]/g, ''));
-                      const total = price + shipping + tax;
-                      setGalleryDeptReceiptData(prev => ({ ...prev, TOTAL_AMOUNT: `$${total.toFixed(2)}` }));
-                    }}
-                    variant="outline"
-                    className="w-full justify-start"
-                  >
-                    <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
-                    </svg>
-                    Calculate Total
-                  </Button>
-                )}
-                {selectedReceiptType === 'grailed' && (
-                  <Button
-                    onClick={() => {
-                      const soldPrice = parseFloat(grailedReceiptData.SOLD_PRICE.replace(/[£$,€]/g, ''));
-                      const tax = parseFloat(grailedReceiptData.TAX_AMOUNT.replace(/[£$,€]/g, ''));
-                      const total = soldPrice + tax;
-                      setGrailedReceiptData(prev => ({ ...prev, TOTAL_AMOUNT: `€${total.toFixed(2)}` }));
-                    }}
-                    variant="outline"
-                    className="w-full justify-start"
-                  >
-                    <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
-                    </svg>
-                    Calculate Total
-                  </Button>
-                )}
-                {selectedReceiptType === 'lv' && (
-                  <Button
-                    onClick={() => {
-                      setLVReceiptData(prev => ({ ...prev, PRODUCT_PRICE: prev.PRODUCT_PRICE }));
-                    }}
-                    variant="outline"
-                    className="w-full justify-start"
-                  >
-                    <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
-                    </svg>
-                    Sync Pricing
-                  </Button>
-                )}
-                {selectedReceiptType === 'moncler' && (
-                  <Button
-                    onClick={() => {
-                      setMonclerReceiptData(prev => ({ ...prev, SUBTOTAL: prev.PRODUCT_PRICE, TOTAL_AMOUNT: prev.PRODUCT_PRICE }));
-                    }}
-                    variant="outline"
-                    className="w-full justify-start"
-                  >
-                    <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 01-2-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
-                    </svg>
-                    Sync Pricing
-                  </Button>
-                )}
-                {selectedReceiptType === 'northface' && (
-                  <Button
-                    onClick={() => {
-                      setNorthFaceReceiptData(prev => ({ ...prev, SUBTOTAL: prev.PRODUCT_PRICE, TOTAL_AMOUNT: prev.PRODUCT_PRICE }));
-                    }}
-                    variant="outline"
-                    className="w-full justify-start"
-                  >
-                    <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 01-2-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
-                    </svg>
-                    Sync Pricing
-                  </Button>
-                )}
+                ))}
+              </div>
+              
+              {/* Category badge */}
+              <div className="mt-4 pt-4 border-t border-gray-200">
+                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
+                  {selectedReceiptInfo?.category}
+                </span>
               </div>
             </div>
           </div>

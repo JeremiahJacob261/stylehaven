@@ -241,6 +241,124 @@ export interface NorthFaceReceiptData {
   SHIPPING_METHOD: string;
 }
 
+export interface SupremeReceiptData {
+  ORDER_NUMBER: string;
+  ORDER_DATE: string;
+  CUSTOMER_NAME: string;
+  CUSTOMER_EMAIL: string;
+  PRODUCT_IMAGE: string;
+  PRODUCT_NAME: string;
+  PRODUCT_SIZE: string;
+  PRODUCT_COLOR: string;
+  PRODUCT_PRICE: string;
+  QUANTITY: string;
+  SUBTOTAL: string;
+  SHIPPING_COST: string;
+  TAX_AMOUNT: string;
+  TOTAL_AMOUNT: string;
+  SHIPPING_ADDRESS_1: string;
+  SHIPPING_ADDRESS_2: string;
+  SHIPPING_ADDRESS_3: string;
+  SHIPPING_ADDRESS_4: string;
+  PAYMENT_METHOD: string;
+  CARD_ENDING: string;
+}
+
+export interface TrapstarReceiptData {
+  ORDER_NUMBER: string;
+  ORDER_DATE: string;
+  CUSTOMER_NAME: string;
+  CUSTOMER_EMAIL: string;
+  PRODUCT_IMAGE: string;
+  PRODUCT_NAME: string;
+  PRODUCT_SIZE: string;
+  PRODUCT_COLOR: string;
+  PRODUCT_PRICE: string;
+  QUANTITY: string;
+  SUBTOTAL: string;
+  SHIPPING_COST: string;
+  TAX_AMOUNT: string;
+  TOTAL_AMOUNT: string;
+  SHIPPING_ADDRESS_1: string;
+  SHIPPING_ADDRESS_2: string;
+  SHIPPING_ADDRESS_3: string;
+  SHIPPING_ADDRESS_4: string;
+  PAYMENT_METHOD: string;
+  CARD_ENDING: string;
+}
+
+export interface StussyReceiptData {
+  ORDER_NUMBER: string;
+  ORDER_DATE: string;
+  CUSTOMER_NAME: string;
+  CUSTOMER_EMAIL: string;
+  PRODUCT_IMAGE: string;
+  PRODUCT_NAME: string;
+  PRODUCT_SIZE: string;
+  PRODUCT_COLOR: string;
+  PRODUCT_PRICE: string;
+  QUANTITY: string;
+  SUBTOTAL: string;
+  SHIPPING_COST: string;
+  TAX_AMOUNT: string;
+  TOTAL_AMOUNT: string;
+  SHIPPING_ADDRESS_1: string;
+  SHIPPING_ADDRESS_2: string;
+  SHIPPING_ADDRESS_3: string;
+  SHIPPING_ADDRESS_4: string;
+  PAYMENT_METHOD: string;
+  CARD_ENDING: string;
+}
+
+export interface YzyGapReceiptData {
+  ORDER_NUMBER: string;
+  ORDER_DATE: string;
+  CUSTOMER_NAME: string;
+  CUSTOMER_EMAIL: string;
+  PRODUCT_IMAGE: string;
+  PRODUCT_NAME: string;
+  PRODUCT_SIZE: string;
+  PRODUCT_COLOR: string;
+  PRODUCT_PRICE: string;
+  QUANTITY: string;
+  SUBTOTAL: string;
+  SHIPPING_COST: string;
+  TAX_AMOUNT: string;
+  TOTAL_AMOUNT: string;
+  SHIPPING_ADDRESS_1: string;
+  SHIPPING_ADDRESS_2: string;
+  SHIPPING_ADDRESS_3: string;
+  SHIPPING_ADDRESS_4: string;
+  PAYMENT_METHOD: string;
+  CARD_ENDING: string;
+}
+
+// Add these interfaces to the existing file
+
+export interface StockXReceiptData {
+  ORDER_NUMBER: string;
+  ORDER_DATE: string;
+  CUSTOMER_NAME: string;
+  CUSTOMER_EMAIL: string;
+  PRODUCT_IMAGE: string;
+  PRODUCT_NAME: string;
+  PRODUCT_SIZE: string;
+  PRODUCT_PRICE: string;
+  SHIPPING_COST: string;
+  TAX_AMOUNT: string;
+  TOTAL_AMOUNT: string;
+  TRACKING_NUMBER: string;
+  ESTIMATED_DELIVERY: string;
+  SHIPPING_ADDRESS_1: string;
+  SHIPPING_ADDRESS_2: string;
+  SHIPPING_ADDRESS_3: string;
+  SHIPPING_ADDRESS_4: string;
+  PAYMENT_METHOD: string;
+  CARD_ENDING: string;
+  ORDER_STATUS: 'ordered' | 'verified'; // To distinguish between the two states
+}
+
+// Update the ReceiptType to include the new brands
 export type ReceiptType = 
   | 'apple' 
   | 'balenciaga' 
@@ -253,4 +371,9 @@ export type ReceiptType =
   | 'grailed' 
   | 'lv'
   | 'moncler'
-  | 'northface';
+  | 'northface'
+  | 'supreme'
+  | 'trapstar'
+  | 'stussy'
+  | 'yzygap'
+  | 'stockx';
