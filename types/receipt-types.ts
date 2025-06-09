@@ -127,9 +127,25 @@ export interface FarfetchReceiptData {
   DELIVERY: string;
   PRODUCT_IMAGE: string;
   BRAND: string;
+  PRODUCT_NAME: string;
+  PRODUCT_SIZE: string;
+  PRODUCT_PRICE: string;
+  TOTAL_AMOUNT: string;
+  TAX_AMOUNT: string;
+  CARD_ENDING: string;
+  PAYMENT_METHOD: string;
   FULLNAME: string;
+  SHIPPING_COST: string;
   PRICE: string;
   TRACKING_URL: string;
+  SHIPPING_ADDRESS1: string;
+  SHIPPING_ADDRESS2: string;
+  SHIPPING_ADDRESS3: string;
+  SHIPPING_ADDRESS4: string;
+  BILLING_ADDRESS1: string;
+  BILLING_ADDRESS2: string;
+  BILLING_ADDRESS3: string;
+  BILLING_ADDRESS4: string;
 }
 
 export interface GalleryDeptReceiptData {
@@ -143,6 +159,8 @@ export interface GalleryDeptReceiptData {
   PRODUCT_PRICE: string;
   QUANTITY: string;
   SUBTOTAL: string;
+  ESTIMATED_DELIVERY: string;
+  TRACKING_NUMBER: string;
   SHIPPING_COST: string;
   TAX_AMOUNT: string;
   TOTAL_AMOUNT: string;

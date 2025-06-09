@@ -109,11 +109,11 @@ export function DiorReceiptForm({ data, onInputChange }: DiorReceiptFormProps) {
                     setTimeout(() => {
                       onInputChange(
                         "PRODUCT_IMAGE",
-                        event?.target.result as string
+                        event?.target?.result as string
                       );
                       console.log(
                         "Image uploaded successfully",
-                        event?.target.result
+                        event?.target?.result
                       );
                     }, 0);
                   }
