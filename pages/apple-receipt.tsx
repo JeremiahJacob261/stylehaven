@@ -50,7 +50,7 @@ const AppleReceiptPage: React.FC = () => {
 
   useEffect(() => {
     // Get data from localStorage if available
-    const storedData = localStorage.getItem('receiptData');
+    const storedData = localStorage.getItem('appleReceiptData');
     if (storedData) {
       try {
         const parsedData = JSON.parse(storedData);

@@ -53,14 +53,45 @@ export function NorthFaceReceiptForm({ data, onInputChange }: NorthFaceReceiptFo
       <div className="space-y-4">
         <h3 className="text-lg font-semibold text-gray-900 border-b pb-2">Product Information</h3>
         
-        <div>
-          <Label htmlFor="product_image">Product Image URL</Label>
-          <Input
-            id="product_image"
-            value={data.PRODUCT_IMAGE}
-            onChange={(e) => onInputChange('PRODUCT_IMAGE', e.target.value)}
-            placeholder="/northface/northface_files/product-image.jpg"
+ <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            Product Image
+          </label>
+          <input
+            type="file"
+            accept="image/*"
+            onChange={(e) => {
+              const file = e.target.files?.[0];
+              if (file) {
+                const reader = new FileReader();
+                reader.onload = (event) => {
+                  if (event.target?.result) {
+                    setTimeout(() => {
+                      onInputChange(
+                        "PRODUCT_IMAGE",
+                        event?.target?.result as string
+                      );
+                      console.log(
+                        "Image uploaded successfully",
+                        event?.target?.result
+                      );
+                    }, 0);
+                  }
+                };
+                reader.readAsDataURL(file);
+              }
+            }}
+            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
           />
+          {data.PRODUCT_IMAGE && (
+            <div className="mt-2">
+              <img
+                src={data.PRODUCT_IMAGE}
+                alt="Product preview"
+                className="w-32 h-32 object-cover rounded-lg border"
+              />
+            </div>
+          )}
         </div>
 
         <div>
