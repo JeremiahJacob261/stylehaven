@@ -10,7 +10,6 @@ const nextConfig: NextConfig = {
   typescript: {
     ignoreBuildErrors: true, // 👈 This is the magic line
   },
-  output:'export'
 };
 
 export default nextConfig;

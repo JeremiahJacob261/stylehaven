@@ -64,7 +64,7 @@ const AppleReceiptPage: React.FC = () => {
   return (
     <>
       <Head>
-        <title>Apple Receipt - Thank you for your order</title>
+        <title>{`Apple - Order ${receiptData.ORDER_NUMBER}`}</title>
         <meta name="viewport" content="width=device-width, initial-scale=1" />
       </Head>
       

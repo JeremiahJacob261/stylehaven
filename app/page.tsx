@@ -41,8 +41,15 @@ import {
   ReceiptType,
 } from "@/types/receipt-types";
 import { monclerx,supremex } from '@/base64_images/start';
+import { useAuth } from "@/contexts/AuthContext";
+import AuthPage from "@/components/auth/AuthPage";
+import PaymentPage from "@/components/payment/PaymentPage";
 
 export default function Home() {
+  const { user, loading, signOut } = useAuth();
+  const profile = user;
+  console.log(user, profile, loading);
+  const [showPayment, setShowPayment] = useState(false);
   const router = useRouter();
   const [selectedReceiptType, setSelectedReceiptType] =
     useState<ReceiptType>("apple");
@@ -646,704 +653,450 @@ export default function Home() {
     setAppleReceiptData((prev) => ({ ...prev, ORDER_TOTAL: newTotal }));
   };
 
+  const sendReceiptEmail = async (receiptType: string, receiptData: any) => {
+    try {
+      const sessionToken = localStorage.getItem('session_token')
+      if (!sessionToken) {
+        alert('Please log in to send emails.')
+        return
+      }
+
+      // Construct the receipt URL - this should point to the actual receipt page
+      const receiptUrl = `${window.location.origin}/${receiptType}-receipt`
+
+      const response = await fetch('/api/send-receipt', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${sessionToken}`
+        },
+        body: JSON.stringify({
+          receiptType: selectedReceiptInfo?.label,
+          receiptUrl,
+          receiptData: receiptData // Pass the actual receipt data
+        })
+      })
+
+      const result = await response.json()
+      
+      if (result.success) {
+        alert('✅ Receipt sent to your email successfully! Check your inbox.')
+      } else {
+        alert(`❌ Failed to send email: ${result.error}`)
+      }
+    } catch (error) {
+      console.error('Email sending error:', error)
+      alert('❌ Failed to send email. Please try again.')
+    }
+  }
+
+  // Update the generateReceipt function to offer email option
   const generateReceipt = () => {
-    if (selectedReceiptType === "apple") {
-      localStorage.setItem(
-        "appleReceiptData",
-        JSON.stringify(appleReceiptData)
-      );
-      router.push("/apple-receipt");
-    } else if (selectedReceiptType === "balenciaga") {
-      localStorage.setItem(
-        "balenciagaReceiptData",
-        JSON.stringify(balenciagaReceiptData)
-      );
-      router.push("/balenciaga-receipt");
-    } else if (selectedReceiptType === "bape") {
-      localStorage.setItem("bapeReceiptData", JSON.stringify(bapeReceiptData));
-      router.push("/bape-receipt");
-    } else if (selectedReceiptType === "dior") {
-      localStorage.setItem("diorReceiptData", JSON.stringify(diorReceiptData));
-      router.push("/dior-receipt");
-    } else if (selectedReceiptType === "nike") {
-      localStorage.setItem("nikeReceiptData", JSON.stringify(nikeReceiptData));
-      router.push("/nike-receipt");
-    } else if (selectedReceiptType === "goat") {
-      localStorage.setItem("goatReceiptData", JSON.stringify(goatReceiptData));
-      router.push("/goat-receipt");
-    } else if (selectedReceiptType === "farfetch") {
-      localStorage.setItem(
-        "farfetchReceiptData",
-        JSON.stringify(farfetchReceiptData)
-      );
-      router.push("/farfetch-receipt");
-    } else if (selectedReceiptType === "gallery_dept") {
-      localStorage.setItem(
-        "galleryDeptReceiptData",
-        JSON.stringify(galleryDeptReceiptData)
-      );
-      router.push("/gallery-dept-receipt");
-    } else if (selectedReceiptType === "grailed") {
-      localStorage.setItem(
-        "grailedReceiptData",
-        JSON.stringify(grailedReceiptData)
-      );
-      router.push("/grailed-receipt");
-    } else if (selectedReceiptType === "lv") {
-      localStorage.setItem("lvReceiptData", JSON.stringify(lvReceiptData));
-      router.push("/lv-receipt");
-    } else if (selectedReceiptType === "moncler") {
-      localStorage.setItem(
-        "monclerReceiptData",
-        JSON.stringify(monclerReceiptData)
-      );
-      router.push("/moncler-receipt");
-    } else if (selectedReceiptType === "northface") {
-      localStorage.setItem(
-        "northfaceReceiptData",
-        JSON.stringify(northFaceReceiptData)
-      );
-      router.push("/northface-receipt");
-    } else if (selectedReceiptType === "supreme") {
-      localStorage.setItem(
-        "supremeReceiptData",
-        JSON.stringify(supremeReceiptData)
-      );
-      router.push("/supreme-receipt");
-    } else if (selectedReceiptType === "trapstar") {
-      localStorage.setItem(
-        "trapstarReceiptData",
-        JSON.stringify(trapstarReceiptData)
-      );
-      router.push("/trapstar-receipt");
-    } else if (selectedReceiptType === "stussy") {
-      localStorage.setItem(
-        "stussyReceiptData",
-        JSON.stringify(stussyReceiptData)
-      );
-      router.push("/stussy-receipt");
-    } else if (selectedReceiptType === "yzygap") {
-      localStorage.setItem(
-        "yzygapReceiptData",
-        JSON.stringify(yzygapReceiptData)
-      );
-      router.push("/yzygap-receipt");
-    } else if (selectedReceiptType === "stockx") {
-      localStorage.setItem(
-        "stockxReceiptData",
-        JSON.stringify(stockxReceiptData)
-      );
-      router.push("/stockx-receipt");
-    }
-  };
-
-  // Get the appropriate icon for each brand (using actual logos from their folders)
-  const getBrandIcon = (brand: ReceiptType) => {
-    switch (brand) {
-      case "apple":
-        return (
-          <img
-            src="/apple/apple_files/apple_icon_2x.png"
-            alt="Apple"
-            className="w-12 h-12 object-contain"
-          />
-        );
-      case "balenciaga":
-        return (
-          <img
-            src="/balenciaga/balenciaga_files/73c19a3b-e950-4a7b-92a3-3b6c9767e6c7.png"
-            alt="Balenciaga"
-            className="w-12 h-12 object-contain"
-          />
-        );
-      //public/bape/Thank you for your purchase!_files/ukbapecomlogo01.png
-      case "bape":
-        return (
-          <img
-            src="/bape/Thank you for your purchase!_files/ukbapecomlogo01.png"
-            alt="BAPE"
-            className="w-24 h-24 object-contain"
-          />
-        );
-      case "dior":
-        return (
-          <img
-            src="/dior/dior_files/cart.png"
-            alt="Dior"
-            className="w-12 h-12 object-contain"
-          />
-        );
-      case "nike":
-        return (
-          <img
-            src="/nike/nike_files/Swoosh2x.png"
-            alt="Nike"
-            className="w-12 h-12 object-contain"
-          />
-        );
-      case "goat":
-        return (
-          <img
-            src="/goat/goat_files/GOATLogo2022.png"
-            alt="GOAT"
-            className="w-12 h-12 object-contain"
-          />
-        );
-        //public/farfetch/farfetch_files/.png
-      case "farfetch":
-        return (
-          <img
-            src="/farfetch/farfetch_files/farfetch_logo_global_dark@4x.png"
-            alt="Farfetch"
-            className="w-24 h-24 object-contain"
-          />
-        );
-      case "gallery_dept":
-        return (
-          <img
-            src="/gallerydept/gallery_dept_files/unnamed.png"
-            alt="Gallery Dept"
-            className="w-12 h-12 object-contain"
-          />
-        );
-      case "grailed":
-        return (
-          <img
-            src="/grailed/grailed_files/logo-no-whitespace.jpg"
-            alt="Grailed"
-            className="w-12 h-12 object-contain"
-          />
-        );
-        //public/lv/lv_files/louis-vuitton--tpl_rs_lv.png
-      case "lv":
-        return (
-          <img
-            src="/lv/lv_files/louis-vuitton--tpl_rs_lv.png"
-            alt="Louis Vuitton"
-            className="w-12 h-12 object-contain"
-          />
-        );
-      case "moncler":
-        return (
-          <img
-            src={monclerx}
-            alt="Moncler"
-            className="w-12 h-12 object-contain"
-          />
-        );
-      case "northface":
-        return (
-          <img
-            src="/northface/Great! Order 73442336 has been placed NORTHFACE_files/0ec5ac62-677e-40f8-9b7d-5c501058bf9c.jpg"
-            alt="The North Face"
-            className="w-12 h-12 object-contain"
-          />
-        );
-        //public/stockx_verified/stockx_new_verified_files/StockX_Vertical_Gray_Digital_RGB.png
-      case "stockx":
-        return (
-          <img
-            src="/stockx_verified/stockx_new_verified_files/StockX_Vertical_Gray_Digital_RGB.png"
-            alt="StockX"
-            className="w-12 h-12 object-contain"
-          />
-        );
-      case "supreme":
-        return  <img
-            src={supremex}
-            alt="Supreme"
-            className="w-12 h-12 object-contain"
-          />;
-      case "trapstar":
-        return <img
-            src="/trapstar/trapstar_files/unnamed.png"
-            alt="trapstar"
-            className="w-12 h-12 object-contain"
-          />;
-      case "stussy":
-        return <img
-            src="/stussy/stussy_files/282540.webp"
-            alt="stussy"
-            className="w-12 h-12 object-contain"
-          />;   
-      case "yzygap":
-        return <img
-            src="/yzygap/yzygap_files/unnamed.png"
-            alt="yzygap"
-            className="w-24 h-24 object-contain"
-          />;
-      default:
-        return (
-          <svg
-            className="w-12 h-12 text-white"
-            viewBox="0 0 24 24"
-            fill="currentColor"
-          >
-            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-1-13h2v6h-2zm0 8h2v2h-2z" />
-          </svg>
-        );
-    }
-  };
-
-  const selectedReceiptInfo = receiptTypes.find(
-    (type) => type.value === selectedReceiptType
-  );
-
-  const renderMobileDropdown = () => (
-    <div className="relative w-full">
-      <button
-        onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-        className="w-full bg-white border border-gray-300 rounded-lg px-4 py-3 text-left flex items-center justify-between shadow-sm hover:border-gray-400 transition-colors"
-      >
-        <div className="flex items-center space-x-3">
-          <span className="text-xl">{selectedReceiptInfo?.icon}</span>
-          <div>
-            <div className="font-medium text-gray-900">
-              {selectedReceiptInfo?.label}
-            </div>
-            <div className="text-xs text-gray-500">
-              {selectedReceiptInfo?.category}
-            </div>
-          </div>
-        </div>
-        <svg
-          className={`w-5 h-5 text-gray-400 transition-transform ${
-            isDropdownOpen ? "rotate-180" : ""
-          }`}
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={2}
-            d="M19 9l-7 7-7-7"
-          />
-        </svg>
-      </button>
-
-      {isDropdownOpen && (
-        <div className="absolute top-full left-0 right-0 mt-2 bg-white border border-gray-200 rounded-lg shadow-lg z-50 max-h-80 overflow-y-auto">
-          {Object.entries(
-            receiptTypes.reduce((acc, type) => {
-              if (!acc[type.category]) acc[type.category] = [];
-              acc[type.category].push(type);
-              return acc;
-            }, {} as Record<string, (typeof receiptTypes)[number][]>)
-          ).map(([category, types]) => (
-            <div key={category}>
-              <div className="px-4 py-2 text-xs font-semibold text-gray-500 uppercase tracking-wide bg-gray-50">
-                {category}
-              </div>
-              {types.map((type) => (
-                <button
-                  key={type.value}
-                  onClick={() => {
-                    setSelectedReceiptType(type.value as ReceiptType);
-                    setIsDropdownOpen(false);
-                  }}
-                  className={`w-full px-4 py-3 text-left flex items-center space-x-3 hover:bg-gray-50 transition-colors ${
-                    selectedReceiptType === type.value
-                      ? "bg-blue-50 border-r-2 border-blue-500"
-                      : ""
-                  }`}
-                >
-                  <span className="text-lg">{type.icon}</span>
-                  <span className="font-medium text-gray-900">
-                    {type.label}
-                  </span>
-                </button>
-              ))}
-            </div>
-          ))}
-        </div>
-      )}
-    </div>
-  );
-
-  const renderDesktopTabs = () => (
-    <div className="bg-white rounded-lg p-2 shadow-md overflow-x-auto">
-      <div className="flex space-x-1 min-w-max">
-        {receiptTypes.map((type) => (
-          <button
-            key={type.value}
-            onClick={() => setSelectedReceiptType(type.value as ReceiptType)}
-            className={`px-3 py-2 sm:px-4 sm:py-3 rounded-md font-medium transition-all text-xs sm:text-sm whitespace-nowrap flex items-center space-x-2 ${
-              selectedReceiptType === type.value
-                ? "bg-gray-900 text-white shadow-md"
-                : "text-gray-600 hover:text-gray-900 hover:bg-gray-50"
-            }`}
-          >
-            <span className="text-sm">{type.icon}</span>
-            <span>{type.label}</span>
-          </button>
-        ))}
-      </div>
-    </div>
-  );
-
-  // Enhanced quick actions for different receipt types
-  const getQuickActions = () => {
-    const commonActions = [
-      {
-        label: "Use Today's Date",
-        icon: "📅",
-        action: () => {
-          const today = getTodayDate();
-          switch (selectedReceiptType) {
-            case "apple":
-              setAppleReceiptData((prev) => ({ ...prev, ORDER_DATE: today }));
-              break;
-            case "nike":
-              setNikeReceiptData((prev) => ({ ...prev, ORDER_DATE: today }));
-              break;
-            case "dior":
-              setDiorReceiptData((prev) => ({ ...prev, ORDER_DATE: today }));
-              break;
-            case "goat":
-              setGoatReceiptData((prev) => ({ ...prev, ORDER_DATE: today }));
-              break;
-            case "stockx":
-              setStockxReceiptData((prev) => ({ ...prev, ORDER_DATE: today }));
-              break;
-            // Add more cases as needed
-          }
-        },
-      },
-      {
-        label: "Generate Order Number",
-        icon: "🔢",
-        action: () => {
-          const prefixMap: Record<string, string> = {
-            apple: "W",
-            nike: "N",
-            dior: "",
-            goat: "GOAT",
-            stockx: "STX",
-            balenciaga: "BAL",
-            bape: "BAPEUK",
-            supreme: "SUP",
-            trapstar: "TS",
-            stussy: "STU",
-            yzygap: "YZY",
-            lv: "LV",
-            moncler: "MCL",
-            northface: "",
-            farfetch: "FF",
-            gallery_dept: "GD",
-            grailed: "GR",
-          };
-
-          const prefix = prefixMap[selectedReceiptType] || "";
-          const orderNumber = generateOrderNumber(prefix);
-
-          switch (selectedReceiptType) {
-            case "apple":
-              setAppleReceiptData((prev) => ({
-                ...prev,
-                ORDER_NUMBER: orderNumber,
-              }));
-              break;
-            case "nike":
-              setNikeReceiptData((prev) => ({
-                ...prev,
-                ORDER_NUMBER: orderNumber,
-              }));
-              break;
-            case "dior":
-              setDiorReceiptData((prev) => ({
-                ...prev,
-                ORDER_NUMBER: orderNumber,
-              }));
-              break;
-            case "goat":
-              setGoatReceiptData((prev) => ({
-                ...prev,
-                ORDER_NUMBER: orderNumber,
-              }));
-              break;
-            case "stockx":
-              setStockxReceiptData((prev) => ({
-                ...prev,
-                ORDER_NUMBER: orderNumber,
-              }));
-              break;
-            // Add more cases
-          }
-        },
-      },
-      {
-        label: "Generate Tracking",
-        icon: "📦",
-        action: () => {
-          const tracking = generateTrackingNumber();
-          switch (selectedReceiptType) {
-            case "goat":
-              setGoatReceiptData((prev) => ({
-                ...prev,
-                TRACKING_NUMBER: tracking,
-              }));
-              break;
-            case "stockx":
-              setStockxReceiptData((prev) => ({
-                ...prev,
-                TRACKING_NUMBER: tracking,
-              }));
-              break;
-            case "gallery_dept":
-              setGalleryDeptReceiptData((prev) => ({
-                ...prev,
-                TRACKING_NUMBER: tracking,
-              }));
-              break;
-          }
-        },
-      },
-      {
-        label: "Set Delivery Date",
-        icon: "🚚",
-        action: () => {
-          const deliveryDate = getDeliveryDate();
-          switch (selectedReceiptType) {
-            case "nike":
-              setNikeReceiptData((prev) => ({
-                ...prev,
-                DELIVERY_DATE: deliveryDate,
-              }));
-              break;
-            case "goat":
-              setGoatReceiptData((prev) => ({
-                ...prev,
-                ESTIMATED_DELIVERY: deliveryDate,
-              }));
-              break;
-            case "stockx":
-              setStockxReceiptData((prev) => ({
-                ...prev,
-                ESTIMATED_DELIVERY: deliveryDate,
-              }));
-              break;
-            case "farfetch":
-              setFarfetchReceiptData((prev) => ({
-                ...prev,
-                DELIVERY: deliveryDate,
-              }));
-              break;
-          }
-        },
-      },
-      {
-        label: "Random Card Ending",
-        icon: "💳",
-        action: () => {
-          const cardEnding = generateRandomCard();
-          switch (selectedReceiptType) {
-            case "bape":
-              setBapeReceiptData((prev) => ({
-                ...prev,
-                CARD_ENDING: cardEnding,
-              }));
-              break;
-            case "dior":
-              setDiorReceiptData((prev) => ({
-                ...prev,
-                CARD_ENDING: cardEnding,
-              }));
-              break;
-            case "nike":
-              setNikeReceiptData((prev) => ({ ...prev, CARD_END: cardEnding }));
-              break;
-            case "stockx":
-              setStockxReceiptData((prev) => ({
-                ...prev,
-                CARD_ENDING: cardEnding,
-              }));
-              break;
-            case "moncler":
-              setMonclerReceiptData((prev) => ({
-                ...prev,
-                CARD_ENDING: cardEnding,
-              }));
-              break;
-            case "supreme":
-              setSupremeReceiptData((prev) => ({
-                ...prev,
-                CARD_ENDING: cardEnding,
-              }));
-              break;
-            case "trapstar":
-              setTrapstarReceiptData((prev) => ({
-                ...prev,
-                CARD_ENDING: cardEnding,
-              }));
-              break;
-            case "stussy":
-              setStussyReceiptData((prev) => ({
-                ...prev,
-                CARD_ENDING: cardEnding,
-              }));
-              break;
-            case "yzygap":
-              setYzyGapReceiptData((prev) => ({
-                ...prev,
-                CARD_ENDING: cardEnding,
-              }));
-              break;
-            case "farfetch":
-              setFarfetchReceiptData((prev) => ({
-                ...prev,
-                CARD_ENDING: cardEnding,
-              }));
-              break;
-          }
-        },
-      },
-    ];
-
-    const specificActions: { label: string; icon: string; action: () => void; }[] = [];
-
-    // Add specific actions based on receipt type
+    let receiptData: any = {}
+    
+    // Get the appropriate receipt data based on type
     switch (selectedReceiptType) {
       case "apple":
-        specificActions.push({
-          label: "Calculate Total",
-          icon: "🧮",
-          action: () => {
-            const price = parseFloat(
-              appleReceiptData.PRODUCT_PRICE.replace(/[£$,€]/g, "")
-            );
-            const shipping =
-              appleReceiptData.SHIPPING_COST.toLowerCase() === "free"
-                ? 0
-                : parseFloat(
-                    appleReceiptData.SHIPPING_COST.replace(/[£$,€]/g, "")
-                  );
-            const total = price + shipping;
-            setAppleReceiptData((prev) => ({
-              ...prev,
-              ORDER_TOTAL: `£${total.toFixed(2)}`,
-            }));
-          },
-        });
-        break;
-
+        receiptData = appleReceiptData
+        localStorage.setItem('appleReceiptData', JSON.stringify(appleReceiptData))
+        window.open('/apple-receipt', '_blank')
+        break
       case "stockx":
-        specificActions.push(
-          {
-            label: "Calculate Total",
-            icon: "🧮",
-            action: () => {
-              const price = parseFloat(
-                stockxReceiptData.PRODUCT_PRICE.replace(/[£$,€]/g, "")
-              );
-              const shipping = parseFloat(
-                stockxReceiptData.SHIPPING_COST.replace(/[£$,€]/g, "")
-              );
-              const tax = parseFloat(
-                stockxReceiptData.TAX_AMOUNT.replace(/[£$,€]/g, "")
-              );
-              const total = price + shipping + tax;
-              setStockxReceiptData((prev) => ({
-                ...prev,
-                TOTAL_AMOUNT: `$${total.toFixed(2)}`,
-              }));
-            },
-          },
-          {
-            label: "Toggle Status",
-            icon: "🔄",
-            action: () => {
-              setStockxReceiptData((prev) => ({
-                ...prev,
-                ORDER_STATUS:
-                  prev.ORDER_STATUS === "ordered" ? "verified" : "ordered",
-              }));
-            },
-          }
-        );
-        break;
-
+        receiptData = stockxReceiptData
+        localStorage.setItem('stockxReceiptData', JSON.stringify(stockxReceiptData))
+        window.open('/stockx-receipt', '_blank')
+        break
       case "nike":
-        specificActions.push({
-          label: "Sync Price & Total",
-          icon: "💰",
-          action: () => {
-            setNikeReceiptData((prev) => ({ ...prev, TOTAL: prev.PRICE }));
-          },
-        });
-        break;
-
+        receiptData = nikeReceiptData
+        localStorage.setItem('nikeReceiptData', JSON.stringify(nikeReceiptData))
+        window.open('/nike-receipt', '_blank')
+        break
       case "goat":
-      case "gallery_dept":
-        specificActions.push({
-          label: "Calculate Total",
-          icon: "🧮",
-          action: () => {
-            if (selectedReceiptType === "goat") {
-              const price = parseFloat(
-                goatReceiptData.PRODUCT_PRICE.replace(/[£$,€]/g, "")
-              );
-              const shipping = parseFloat(
-                goatReceiptData.SHIPPING_COST.replace(/[£$,€]/g, "")
-              );
-              const tax = parseFloat(
-                goatReceiptData.TAX_AMOUNT.replace(/[£$,€]/g, "")
-              );
-              const total = price + shipping + tax;
-              setGoatReceiptData((prev) => ({
-                ...prev,
-                TOTAL_AMOUNT: `$${total.toFixed(2)}`,
-              }));
-            }
-          },
-        });
-        break;
-
+        receiptData = goatReceiptData
+        localStorage.setItem('goatReceiptData', JSON.stringify(goatReceiptData))
+        window.open('/goat-receipt', '_blank')
+        break
       case "bape":
-        specificActions.push({
-          label: "Calculate Total",
-          icon: "🧮",
-          action: () => {
-            const price = parseFloat(
-              bapeReceiptData.PRODUCT_PRICE.replace(/[£$,€]/g, "")
-            );
-            const shipping = parseFloat(
-              bapeReceiptData.SHIPPING_COST.replace(/[£$,€]/g, "")
-            );
-            const total = price + shipping;
-            setBapeReceiptData((prev) => ({
-              ...prev,
-              ORDER_TOTAL_CURRENCY: `£${total.toFixed(2)} GBP`,
-            }));
-          },
-        });
-        break;
-
+        receiptData = bapeReceiptData
+        localStorage.setItem('bapeReceiptData', JSON.stringify(bapeReceiptData))
+        window.open('/bape-receipt', '_blank')
+        break
       case "grailed":
-        specificActions.push({
-          label: "Calculate Total",
-          icon: "🧮",
-          action: () => {
-            const soldPrice = parseFloat(
-              grailedReceiptData.SOLD_PRICE.replace(/[£$,€]/g, "")
-            );
-            const tax = parseFloat(
-              grailedReceiptData.TAX_AMOUNT.replace(/[£$,€]/g, "")
-            );
-            const total = soldPrice + tax;
-            setGrailedReceiptData((prev) => ({
-              ...prev,
-              TOTAL_AMOUNT: `€${total.toFixed(2)}`,
-            }));
-          },
-        });
-        break;
+        receiptData = grailedReceiptData
+        localStorage.setItem('grailedReceiptData', JSON.stringify(grailedReceiptData))
+        window.open('/grailed-receipt', '_blank')
+        break
+      case "farfetch":
+        receiptData = farfetchReceiptData
+        localStorage.setItem('farfetchReceiptData', JSON.stringify(farfetchReceiptData))
+        window.open('/farfetch-receipt', '_blank')
+        break
+      case "gallery_dept":
+        receiptData = galleryDeptReceiptData
+        localStorage.setItem('galleryDeptReceiptData', JSON.stringify(galleryDeptReceiptData))
+        window.open('/gallery-dept-receipt', '_blank')
+        break
+      case "lv":
+        receiptData = lvReceiptData
+        localStorage.setItem('lvReceiptData', JSON.stringify(lvReceiptData))
+        window.open('/lv-receipt', '_blank')
+        break
+      case "balenciaga":
+        receiptData = balenciagaReceiptData
+        localStorage.setItem('balenciagaReceiptData', JSON.stringify(balenciagaReceiptData))
+        window.open('/balenciaga-receipt', '_blank')
+        break
+      case "dior":
+        receiptData = diorReceiptData
+        localStorage.setItem('diorReceiptData', JSON.stringify(diorReceiptData))
+        window.open('/dior-receipt', '_blank')
+        break
+      case "moncler":
+        receiptData = monclerReceiptData
+        localStorage.setItem('monclerReceiptData', JSON.stringify(monclerReceiptData))
+        window.open('/moncler-receipt', '_blank')
+        break
+      case "northface":
+        receiptData = northFaceReceiptData
+        localStorage.setItem('northfaceReceiptData', JSON.stringify(northFaceReceiptData))
+        window.open('/northface-receipt', '_blank')
+        break
+      case "supreme":
+        receiptData = supremeReceiptData
+        localStorage.setItem('supremeReceiptData', JSON.stringify(supremeReceiptData))
+        window.open('/supreme-receipt', '_blank')
+        break
+      case "trapstar":
+        receiptData = trapstarReceiptData
+        localStorage.setItem('trapstarReceiptData', JSON.stringify(trapstarReceiptData))
+        window.open('/trapstar-receipt', '_blank')
+        break
+      case "stussy":
+        receiptData = stussyReceiptData
+        localStorage.setItem('stussyReceiptData', JSON.stringify(stussyReceiptData))
+        window.open('/stussy-receipt', '_blank')
+        break
+      case "yzygap":
+        receiptData = yzygapReceiptData
+        localStorage.setItem('yzygapReceiptData', JSON.stringify(yzygapReceiptData))
+        window.open('/yzygap-receipt', '_blank')
+        break
+      default:
+        alert("Please select a receipt type")
+        return
     }
 
-    return [...commonActions, ...specificActions];
-  };
+    // Show email option after a short delay
+    setTimeout(() => {
+      const shouldEmail = confirm('Receipt generated! Would you like to email this receipt to yourself?')
+      if (shouldEmail) {
+        sendReceiptEmail(selectedReceiptType, receiptData)
+      }
+    }, 1500) // Give time for the receipt window to open
+  }
 
+  // Update your quick actions to include email functionality
+ const getQuickActions = () => {
+  const commonActions = [
+    {
+      label: "Generate Order Number",
+      icon: "🔢",
+      action: () => {
+        const prefix = selectedReceiptType.toUpperCase().substring(0, 3);
+        const newOrderNumber = generateOrderNumber(prefix);
+        
+        // Update the appropriate receipt data based on selected type
+        switch (selectedReceiptType) {
+          case "apple":
+            setAppleReceiptData(prev => ({ ...prev, ORDER_NUMBER: newOrderNumber }));
+            break;
+          case "stockx":
+            setStockxReceiptData(prev => ({ ...prev, ORDER_NUMBER: newOrderNumber }));
+            break;
+          case "nike":
+            setNikeReceiptData(prev => ({ ...prev, ORDER_NUMBER: newOrderNumber }));
+            break;
+          case "goat":
+            setGoatReceiptData(prev => ({ ...prev, ORDER_NUMBER: newOrderNumber }));
+            break;
+          case "bape":
+            setBapeReceiptData(prev => ({ ...prev, ORDER_NUMBER: newOrderNumber }));
+            break;
+          case "grailed":
+            setGrailedReceiptData(prev => ({ ...prev, ORDER_ID: newOrderNumber }));
+            break;
+          case "farfetch":
+            setFarfetchReceiptData(prev => ({ ...prev, ORDERNUMBER: newOrderNumber }));
+            break;
+          case "gallery_dept":
+            setGalleryDeptReceiptData(prev => ({ ...prev, ORDER_NUMBER: newOrderNumber }));
+            break;
+          case "lv":
+            setLVReceiptData(prev => ({ ...prev, ORDER_NUMBER: newOrderNumber }));
+            break;
+          case "balenciaga":
+            setBalenciagaReceiptData(prev => ({ ...prev, ORDER_NUMBER: newOrderNumber }));
+            break;
+          case "dior":
+            setDiorReceiptData(prev => ({ ...prev, ORDER_NUMBER: newOrderNumber }));
+            break;
+          case "moncler":
+            setMonclerReceiptData(prev => ({ ...prev, ORDER_NUMBER: newOrderNumber }));
+            break;
+          case "northface":
+            setNorthFaceReceiptData(prev => ({ ...prev, ORDER_NUMBER: newOrderNumber }));
+            break;
+          case "supreme":
+            setSupremeReceiptData(prev => ({ ...prev, ORDER_NUMBER: newOrderNumber }));
+            break;
+          case "trapstar":
+            setTrapstarReceiptData(prev => ({ ...prev, ORDER_NUMBER: newOrderNumber }));
+            break;
+          case "stussy":
+            setStussyReceiptData(prev => ({ ...prev, ORDER_NUMBER: newOrderNumber }));
+            break;
+          case "yzygap":
+            setYzyGapReceiptData(prev => ({ ...prev, ORDER_NUMBER: newOrderNumber }));
+            break;
+        }
+      },
+    },
+    {
+      label: "Generate Tracking Number",
+      icon: "📦",
+      action: () => {
+        const newTrackingNumber = generateTrackingNumber();
+        
+        // Update receipts that have tracking numbers
+        switch (selectedReceiptType) {
+          case "goat":
+            setGoatReceiptData(prev => ({ ...prev, TRACKING_NUMBER: newTrackingNumber }));
+            break;
+          case "stockx":
+            setStockxReceiptData(prev => ({ ...prev, TRACKING_NUMBER: newTrackingNumber }));
+            break;
+          case "gallery_dept":
+            setGalleryDeptReceiptData(prev => ({ ...prev, TRACKING_NUMBER: newTrackingNumber }));
+            break;
+          case "farfetch":
+            setFarfetchReceiptData(prev => ({ ...prev, TRACKING_URL: `https://track.dhl.com/${newTrackingNumber}` }));
+            break;
+          default:
+            alert(`Tracking numbers not supported for ${selectedReceiptType}`);
+            return;
+        }
+     },
+    },
+    {
+      label: "Set Today's Date",
+      icon: "📅",
+      action: () => {
+        const todayDate = getTodayDate();
+        
+        // Update the appropriate date field based on selected type
+        switch (selectedReceiptType) {
+          case "apple":
+            setAppleReceiptData(prev => ({ ...prev, ORDER_DATE: todayDate }));
+            break;
+          case "stockx":
+            setStockxReceiptData(prev => ({ ...prev, ORDER_DATE: todayDate }));
+            break;
+          case "nike":
+            setNikeReceiptData(prev => ({ ...prev, ORDER_DATE: todayDate }));
+            break;
+          case "goat":
+            setGoatReceiptData(prev => ({ ...prev, ORDER_DATE: todayDate }));
+            break;
+          case "bape":
+            setBapeReceiptData(prev => ({ ...prev, ORDER_DATE: todayDate }));
+            break;
+          case "grailed":
+            setGrailedReceiptData(prev => ({ ...prev, ORDER_DATE: todayDate }));
+            break;
+          case "gallery_dept":
+            setGalleryDeptReceiptData(prev => ({ ...prev, ORDER_DATE: todayDate }));
+            break;
+          case "lv":
+            setLVReceiptData(prev => ({ ...prev, ORDER_DATE: todayDate }));
+            break;
+          case "dior":
+            setDiorReceiptData(prev => ({ ...prev, ORDER_DATE: todayDate }));
+            break;
+          case "moncler":
+            setMonclerReceiptData(prev => ({ ...prev, DATE: todayDate }));
+            break;
+          case "northface":
+            setNorthFaceReceiptData(prev => ({ ...prev, ORDER_DATE: todayDate }));
+            break;
+          case "supreme":
+            setSupremeReceiptData(prev => ({ ...prev, ORDER_DATE: todayDate }));
+            break;
+          case "trapstar":
+            setTrapstarReceiptData(prev => ({ ...prev, ORDER_DATE: todayDate }));
+            break;
+          case "stussy":
+            setStussyReceiptData(prev => ({ ...prev, ORDER_DATE: todayDate }));
+            break;
+          case "yzygap":
+            setYzyGapReceiptData(prev => ({ ...prev, ORDER_DATE: todayDate }));
+            break;
+          case "farfetch":
+            setFarfetchReceiptData(prev => ({ ...prev, DELIVERY: getDeliveryDate() }));
+            break;
+        }
+      },
+    },
+    {
+      label: "Generate Delivery Date",
+      icon: "🚚",
+      action: () => {
+        const deliveryDate = getDeliveryDate();
+        
+        // Update delivery dates
+        switch (selectedReceiptType) {
+          case "nike":
+            setNikeReceiptData(prev => ({ ...prev, DELIVERY_DATE: deliveryDate }));
+            break;
+          case "goat":
+            setGoatReceiptData(prev => ({ ...prev, ESTIMATED_DELIVERY: deliveryDate }));
+            break;
+          case "stockx":
+            setStockxReceiptData(prev => ({ ...prev, ESTIMATED_DELIVERY: deliveryDate }));
+            break;
+          case "gallery_dept":
+            setGalleryDeptReceiptData(prev => ({ ...prev, ESTIMATED_DELIVERY: deliveryDate }));
+            break;
+          case "farfetch":
+            setFarfetchReceiptData(prev => ({ ...prev, DELIVERY: deliveryDate }));
+            break;
+          default:
+            alert(`Delivery dates not supported for ${selectedReceiptType}`);
+            return;
+        }
+      },
+    },
+    {
+      label: "Generate Card Number",
+      icon: "💳",
+      action: () => {
+        const cardNumber = generateRandomCard();
+        
+        // Update card ending fields
+        switch (selectedReceiptType) {
+          case "nike":
+            setNikeReceiptData(prev => ({ ...prev, CARD_END: cardNumber }));
+            break;
+          case "bape":
+            setBapeReceiptData(prev => ({ ...prev, CARD_ENDING: cardNumber }));
+            break;
+          case "dior":
+            setDiorReceiptData(prev => ({ ...prev, CARD_ENDING: cardNumber }));
+            break;
+          case "farfetch":
+            setFarfetchReceiptData(prev => ({ ...prev, CARD_ENDING: cardNumber }));
+            break;
+          case "moncler":
+            setMonclerReceiptData(prev => ({ ...prev, CARD_ENDING: cardNumber }));
+            break;
+          case "stockx":
+            setStockxReceiptData(prev => ({ ...prev, CARD_ENDING: cardNumber }));
+            break;
+          case "supreme":
+            setSupremeReceiptData(prev => ({ ...prev, CARD_ENDING: cardNumber }));
+            break;
+          case "trapstar":
+            setTrapstarReceiptData(prev => ({ ...prev, CARD_ENDING: cardNumber }));
+            break;
+          case "stussy":
+            setStussyReceiptData(prev => ({ ...prev, CARD_ENDING: cardNumber }));
+            break;
+          case "yzygap":
+            setYzyGapReceiptData(prev => ({ ...prev, CARD_ENDING: cardNumber }));
+            break;
+          default:
+           return;
+        }
+      },
+    },
+    {
+      label: "Email Receipt",
+      icon: "📧",
+      action: () => {
+        // const receiptData = getCurrentReceiptData();
+        // if (receiptData) {
+        //   sendReceiptEmail(selectedReceiptType, receiptData);
+        // } else {
+        //   alert('Please fill in receipt details first!');
+        // }
+      },
+    }
+  ];
+
+  // Add specific actions based on receipt type
+  const specificActions: { label: string; icon: string; action: () => void }[] = [];
+
+  switch (selectedReceiptType) {
+    case "apple":
+      specificActions.push({
+        label: "Calculate Total",
+        icon: "🧮",
+        action: () => {
+          const price = parseFloat(
+            appleReceiptData.PRODUCT_PRICE.replace(/[£$,€]/g, "")
+          );
+          const shipping =
+            appleReceiptData.SHIPPING_COST.toLowerCase() === "free"
+              ? 0
+              : parseFloat(
+                  appleReceiptData.SHIPPING_COST.replace(/[£$,€]/g, "")
+                );
+          const total = price + shipping;
+          setAppleReceiptData((prev) => ({
+            ...prev,
+            ORDER_TOTAL: `£${total.toFixed(2)}`,
+          }));
+       },
+      });
+      break;
+      
+    case "stockx":
+      specificActions.push({
+        label: "Mark as Verified",
+        icon: "✅",
+        action: () => {
+          setStockxReceiptData(prev => ({ ...prev, ORDER_STATUS: "verified" }));
+     
+        },
+      });
+      break;
+      
+    case "grailed":
+      specificActions.push({
+        label: "Set Random Seller",
+        icon: "👤",
+        action: () => {
+          const sellers = ["VintageKing", "SneakerHead", "FashionGuru", "StyleMaster", "TrendSetter"];
+          const randomSeller = sellers[Math.floor(Math.random() * sellers.length)];
+          setGrailedReceiptData(prev => ({ ...prev, SELLER_NAME: randomSeller }));
+         
+        },
+      });
+      break;
+      
+    case "farfetch":
+      specificActions.push({
+        label: "Set Free Shipping",
+        icon: "🆓",
+        action: () => {
+          setFarfetchReceiptData(prev => ({ ...prev, SHIPPING_COST: "Free" }));
+         
+        },
+      });
+      break;
+  }
+
+  return [...commonActions, ...specificActions];
+};
   const renderReceiptForm = () => {
     switch (selectedReceiptType) {
       case "apple":
@@ -1472,11 +1225,194 @@ export default function Home() {
     }
   };
 
+
+   // Show loading spinner while checking auth
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-16 h-16 border-4 border-gray-300 border-t-blue-600 rounded-full animate-spin mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Show auth page if not logged in
+  if (!user) {
+    return <AuthPage onAuthSuccess={() => setShowPayment(true)} />;
+  }
+
+  // Show payment page if not paid (and not staff)
+  if (profile && !profile.has_paid && !profile.is_staff) {
+    return <PaymentPage onPaymentSuccess={() => setShowPayment(false)} />;
+  }
+
+  function renderMobileDropdown() {
+    const selectedReceiptInfo = receiptTypes.find(
+      (type) => type.value === selectedReceiptType
+    );
+
+    return (
+      <div className="relative">
+        <button
+          onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+          className="w-full flex items-center justify-between px-4 py-3 bg-white border border-gray-300 rounded-lg shadow-sm text-left hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+        >
+          <div className="flex items-center">
+            <span className="text-lg mr-3">{selectedReceiptInfo?.icon}</span>
+            <div>
+              <div className="font-medium text-gray-900">
+                {selectedReceiptInfo?.label}
+              </div>
+              <div className="text-sm text-gray-500">
+                {selectedReceiptInfo?.category}
+              </div>
+            </div>
+          </div>
+          <svg
+            className={`w-5 h-5 text-gray-400 transition-transform ${
+              isDropdownOpen ? "rotate-180" : ""
+            }`}
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M19 9l-7 7-7-7"
+            />
+          </svg>
+        </button>
+
+        {isDropdownOpen && (
+          <div className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg max-h-96 overflow-y-auto">
+            {receiptTypes.map((type) => (
+              <button
+                key={type.value}
+                onClick={() => {
+                  setSelectedReceiptType(type.value);
+                  setIsDropdownOpen(false);
+                }}
+                className={`w-full flex items-center px-4 py-3 text-left hover:bg-gray-50 transition-colors ${
+                  selectedReceiptType === type.value
+                    ? "bg-blue-50 border-l-4 border-blue-500"
+                    : ""
+                }`}
+              >
+                <span className="text-lg mr-3">{type.icon}</span>
+                <div>
+                  <div className="font-medium text-gray-900">{type.label}</div>
+                  <div className="text-sm text-gray-500">{type.category}</div>
+                </div>
+              </button>
+            ))}
+          </div>
+        )}
+      </div>
+    );
+  }
+
+  function renderDesktopTabs() {
+    // Group receipt types by category
+    const groupedTypes = receiptTypes.reduce((acc, type) => {
+      if (!acc[type.category]) {
+        acc[type.category] = [];
+      }
+      acc[type.category].push(type);
+      return acc;
+    }, {} as Record<string, Array<typeof receiptTypes[number]>>);
+
+    return (
+      <div className="space-y-4">
+        {Object.entries(groupedTypes).map(([category, types]) => (
+          <div key={category}>
+            <h3 className="text-sm font-medium text-gray-500 mb-2 px-4">
+              {category}
+            </h3>
+            <div className="flex flex-wrap gap-2">
+              {types.map((type) => (
+                <button
+                  key={type.value}
+                  onClick={() => setSelectedReceiptType(type.value)}
+                  className={`flex items-center px-4 py-2 rounded-lg text-sm font-medium transition-all ${
+                    selectedReceiptType === type.value
+                      ? "bg-blue-600 text-white shadow-lg"
+                      : "bg-white text-gray-700 hover:bg-gray-50 border border-gray-200"
+                  }`}
+                >
+                  <span className="mr-2">{type.icon}</span>
+                  {type.label}
+                </button>
+              ))}
+            </div>
+          </div>
+        ))}
+      </div>
+    );
+  }
+
+  function getBrandIcon(receiptType: ReceiptType): string {
+    const iconMap: Record<ReceiptType, string> = {
+      apple: "🍎",
+      nike: "✓",
+      goat: "🐐",
+      stockx: "📈",
+      balenciaga: "👑",
+      dior: "💎",
+      lv: "🛍️",
+      moncler: "🧥",
+      farfetch: "🌟",
+      bape: "🦍",
+      supreme: "🔴",
+      trapstar: "⭐",
+      stussy: "🌊",
+      yzygap: "🎨",
+      gallery_dept: "🎭",
+      northface: "⛰️",
+      grailed: "🔥",
+    };
+    return iconMap[receiptType] || "📄";
+  }
+
+  const selectedReceiptInfo = receiptTypes.find(
+    (type) => type.value === selectedReceiptType
+  );
   return (
     <div className="w-full bg-gradient-to-br from-gray-50 to-gray-100 min-h-screen p-4 sm:p-8">
       <div className="max-w-6xl mx-auto">
-        {/* Header */}
+        {/* Header with user info */}
         <div className="text-center mb-8 sm:mb-12">
+          <div className="flex justify-between items-center mb-4">
+            <div className="flex items-center space-x-3">
+              <div className="w-10 h-10 bg-gray-900 rounded-xl flex items-center justify-center">
+                <img
+                  src="/natetube.jpg"
+                  alt="NateTube"
+                  className="w-8 h-8 rounded-lg object-cover"
+                />
+              </div>
+              <div className="text-left">
+                <p className="text-sm font-medium text-gray-900">
+                  Welcome back, {user?.username}
+                </p>
+                <p className="text-xs text-gray-500">
+                  {user?.is_staff ? 'Staff Account' : 'Premium User'}
+                </p>
+              </div>
+            </div>
+            <Button
+              onClick={signOut}
+              variant="outline"
+              size="sm"
+              className="text-gray-600 hover:text-gray-900"
+            >
+              Sign Out
+            </Button>
+          </div>
+          
           <div className="flex justify-center items-center mb-4 sm:mb-6">
             <div className="w-12 h-12 sm:w-16 sm:h-16 rounded-2xl overflow-hidden">
               <img
@@ -1618,3 +1554,7 @@ export default function Home() {
     </div>
   );
 }
+function getCurrentReceiptData() {
+  throw new Error("Function not implemented.");
+}
+
