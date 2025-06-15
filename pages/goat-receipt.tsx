@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import Head from 'next/head';
+import { GetServerSideProps } from 'next';
+import { getReceiptData } from '@/lib/receipt-data';
 
 interface GoatReceiptProps {
   ORDER_NUMBER: string;
@@ -41,20 +43,29 @@ const defaultProps: GoatReceiptProps = {
   SHIPPING_ADDRESS_4: "United States"
 };
 
-const GoatReceiptPage: React.FC = () => {
-  const [receiptData, setReceiptData] = useState<GoatReceiptProps>(defaultProps);
+interface GoatReceiptPageProps {
+  receiptData?: GoatReceiptProps;
+  receiptId?: string;
+}
+
+const GoatReceiptPage: React.FC<GoatReceiptPageProps> = ({ 
+  receiptData: serverReceiptData, 
+  receiptId 
+}) => {
+  const [receiptData, setReceiptData] = useState<GoatReceiptProps>(
+    serverReceiptData || defaultProps
+  );
 
   useEffect(() => {
-    const storedData = localStorage.getItem('goatReceiptData');
-    if (storedData) {
-      try {
-        const parsedData = JSON.parse(storedData);
-        setReceiptData(parsedData);
-      } catch (error) {
-        console.error('Error parsing GOAT receipt data:', error);
+    if (!serverReceiptData && !receiptId) {
+      const storedData = localStorage.getItem('goatReceiptData');
+      if (storedData) {
+        try {
+          setReceiptData(JSON.parse(storedData));
+        } catch (e) {}
       }
     }
-  }, []);
+  }, [serverReceiptData, receiptId]);
 
   return (
     <>
@@ -158,5 +169,34 @@ const GoatReceiptPage: React.FC = () => {
     </>
   );
 };
+
+export const getServerSideProps: GetServerSideProps = async (context) => {
+  const { id } = context.query;
+
+  if (id && typeof id === 'string') {
+    try {
+      const receipt = await getReceiptData(id);
+      
+      if (receipt && receipt.receipt_type === 'goat') {
+        return {
+          props: {
+            receiptData: receipt.receipt_data,
+            receiptId: id,
+          },
+        };
+      }
+    } catch (error) {
+      console.error('Error fetching receipt data:', error);
+    }
+  }
+
+  return {
+    props: {
+      receiptData: null,
+      receiptId: null,
+    },
+  };
+};
+
 
 export default GoatReceiptPage;

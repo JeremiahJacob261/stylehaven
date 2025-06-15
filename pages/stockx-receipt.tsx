@@ -2,6 +2,8 @@
 
 import React, { useState, useEffect } from "react";
 import Head from "next/head";
+import { GetServerSideProps } from 'next';
+import { getReceiptData } from '@/lib/receipt-data';
 
 interface StockXReceiptProps {
   ORDER_NUMBER: string;
@@ -49,20 +51,31 @@ const defaultProps: StockXReceiptProps = {
   ORDER_STATUS: "ordered"
 };
 
-const StockXReceiptPage: React.FC = () => {
-  const [receiptData, setReceiptData] = useState<StockXReceiptProps>(defaultProps);
+
+interface StockXReceiptPageProps {
+  receiptData?: StockXReceiptProps;
+  receiptId?: string;
+}
+
+const StockXReceiptPage: React.FC<StockXReceiptPageProps> = ({ 
+  receiptData: serverReceiptData, 
+  receiptId 
+}) => {
+  const [receiptData, setReceiptData] = useState<StockXReceiptProps>(
+    serverReceiptData || defaultProps
+  );
 
   useEffect(() => {
-    const storedData = localStorage.getItem('stockxReceiptData');
-    if (storedData) {
-      try {
-        const parsedData = JSON.parse(storedData);
-        setReceiptData(parsedData);
-      } catch (error) {
-        console.error('Error parsing StockX receipt data:', error);
+    // Fallback to localStorage if no server data and no receiptId
+    if (!serverReceiptData && !receiptId) {
+      const storedData = localStorage.getItem('stockxReceiptData');
+      if (storedData) {
+        try {
+          setReceiptData(JSON.parse(storedData));
+        } catch (e) {}
       }
     }
-  }, []);
+  }, [serverReceiptData, receiptId]);
 
   const isVerified = receiptData.ORDER_STATUS === 'verified';
   const title = isVerified ? "Your StockX order has been verified & shipped!" : "Your order has been placed";
@@ -456,5 +469,36 @@ const StockXReceiptPage: React.FC = () => {
     </>
   );
 };
+
+
+export const getServerSideProps: GetServerSideProps = async (context) => {
+  const { id } = context.query;
+
+  if (id && typeof id === 'string') {
+    try {
+      const receipt = await getReceiptData(id);
+      
+      if (receipt && receipt.receipt_type === 'stockx') {
+        return {
+          props: {
+            receiptData: receipt.receipt_data,
+            receiptId: id,
+          },
+        };
+      }
+    } catch (error) {
+      console.error('Error fetching receipt data:', error);
+    }
+  }
+
+  return {
+    props: {
+      receiptData: null,
+      receiptId: null,
+    },
+  };
+};
+
+
 
 export default StockXReceiptPage;

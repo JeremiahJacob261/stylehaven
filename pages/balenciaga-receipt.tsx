@@ -2,6 +2,8 @@
 
 import React, { useEffect, useState } from 'react';
 import Head from 'next/head';
+import { GetServerSideProps } from 'next';
+import { getReceiptData } from '@/lib/receipt-data';
 
 interface BalenciagaReceiptProps {
   FIRSTNAME: string;
@@ -37,25 +39,40 @@ const defaultProps: BalenciagaReceiptProps = {
   BILLING4: "United Kingdom"
 };
 
-const BalenciagaReceiptPage: React.FC = () => {
-  const [receiptData, setReceiptData] = useState<BalenciagaReceiptProps>(defaultProps);
+interface BalenciagaReceiptPageProps {
+  receiptData?: BalenciagaReceiptProps;
+  receiptId?: string;
+}
+
+const BalenciagaReceiptPage: React.FC<BalenciagaReceiptPageProps> = ({ 
+  receiptData: serverReceiptData, 
+  receiptId 
+}) => {
+  const [receiptData, setReceiptData] = useState<BalenciagaReceiptProps>(
+    serverReceiptData || defaultProps
+  );
+
 
   useEffect(() => {
-    const storedData = localStorage.getItem('balenciagaReceiptData');
-    if (storedData) {
-      try {
-        const parsedData = JSON.parse(storedData);
-        setReceiptData(parsedData);
-      } catch (error) {
-        console.error('Error parsing receipt data:', error);
+    // Fallback to localStorage if no server data and no receiptId
+    if (!serverReceiptData && !receiptId) {
+      const storedData = localStorage.getItem('balenciagaReceiptData');
+      if (storedData) {
+        try {
+          const parsedData = JSON.parse(storedData);
+          setReceiptData(parsedData);
+        } catch (error) {
+          console.error('Error parsing receipt data:', error);
+        }
       }
     }
-  }, []);
+  }, [serverReceiptData, receiptId]);
+
 
   return (
     <>
       <Head>
-        <title>Balenciaga - Order Registration</title>
+        <title>{`Balenciaga - Order ${receiptData.ORDER_NUMBER}`}</title>
         <meta name="viewport" content="width=device-width, initial-scale=1" />
       </Head>
       
@@ -548,6 +565,36 @@ const BalenciagaReceiptPage: React.FC = () => {
       </div>
     </>
   );
+};
+
+
+export const getServerSideProps: GetServerSideProps = async (context) => {
+  const { id } = context.query;
+
+  if (id && typeof id === 'string') {
+    try {
+      const receipt = await getReceiptData(id);
+      
+      if (receipt && receipt.receipt_type === 'balenciaga') {
+        return {
+          props: {
+            receiptData: receipt.receipt_data,
+            receiptId: id,
+          },
+        };
+      }
+    } catch (error) {
+      console.error('Error fetching receipt data:', error);
+    }
+  }
+
+  // Return empty props if no valid receipt found
+  return {
+    props: {
+      receiptData: null,
+      receiptId: null,
+    },
+  };
 };
 
 export default BalenciagaReceiptPage;

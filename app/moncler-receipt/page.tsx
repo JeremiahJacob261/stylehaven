@@ -2,16 +2,90 @@
 
 import { useEffect, useState } from 'react';
 import { MonclerReceiptData } from '@/types/receipt-types';
+import { GetServerSideProps } from 'next';
+import { getReceiptData } from '@/lib/receipt-data';
 
-export default function MonclerReceipt() {
-  const [receiptData, setReceiptData] = useState<MonclerReceiptData | null>(null);
+interface MonclerReceiptProps {
+  ORDER_NUMBER: string;
+  ORDER_DATE: string;
+  CUSTOMER_NAME: string;
+  CUSTOMER_EMAIL: string;
+  PRODUCT_IMAGE: string;
+  PRODUCT_NAME: string;
+  PRODUCT_COLOR: string;
+  PRODUCT_SIZE: string;
+  PRODUCT_PRICE: string;
+  QUANTITY: string;
+  SUBTOTAL: string;
+  SHIPPING_COST: string;
+  DATE:string;
+  FIRST_NAME:string;
+  TAX_AMOUNT: string;
+  TOTAL_AMOUNT: string;
+  SHIPPING_ADDRESS_1: string;
+  SHIPPING_ADDRESS_2: string;
+  SHIPPING_ADDRESS_3: string;
+  SHIPPING_ADDRESS_4: string;
+  BILLING_ADDRESS_1: string;
+  BILLING_ADDRESS_2: string;
+  BILLING_ADDRESS_3: string;
+  BILLING_ADDRESS_4: string;
+  PAYMENT_METHOD: string;
+  CARD_ENDING: string;
+}
+
+const defaultProps: MonclerReceiptProps = {
+  ORDER_NUMBER: "MON123456789",
+  ORDER_DATE: "December 1, 2024",
+  CUSTOMER_NAME: "John Doe",
+  CUSTOMER_EMAIL: "john.doe@example.com",
+  PRODUCT_IMAGE: "/moncler/moncler_files/product-image.jpg",
+  PRODUCT_NAME: "Maya Down Jacket",
+  PRODUCT_COLOR: "Black",
+  PRODUCT_SIZE: "3",
+  PRODUCT_PRICE: "€ 1,650",
+  QUANTITY: "1",
+  DATE:"",
+  FIRST_NAME:"",
+  SUBTOTAL: "€ 1,650",
+  SHIPPING_COST: "Free",
+  TAX_AMOUNT: "€ 330",
+  TOTAL_AMOUNT: "€ 1,980",
+  SHIPPING_ADDRESS_1: "John Doe",
+  SHIPPING_ADDRESS_2: "123 Alpine Street",
+  SHIPPING_ADDRESS_3: "Milan, 20121",
+  SHIPPING_ADDRESS_4: "Italy",
+  BILLING_ADDRESS_1: "John Doe",
+  BILLING_ADDRESS_2: "123 Alpine Street",
+  BILLING_ADDRESS_3: "Milan, 20121",
+  BILLING_ADDRESS_4: "Italy",
+  PAYMENT_METHOD: "Visa",
+  CARD_ENDING: "4567"
+};
+
+interface MonclerReceiptPageProps {
+  receiptData?: MonclerReceiptProps;
+  receiptId?: string;
+}
+
+const MonclerReceiptPage: React.FC<MonclerReceiptPageProps> = ({ 
+  receiptData: serverReceiptData, 
+  receiptId 
+}) => {
+  const [receiptData, setReceiptData] = useState<MonclerReceiptProps>(
+    serverReceiptData || defaultProps
+  );
 
   useEffect(() => {
-    const savedData = localStorage.getItem('monclerReceiptData');
-    if (savedData) {
-      setReceiptData(JSON.parse(savedData));
+    if (!serverReceiptData && !receiptId) {
+      const storedData = localStorage.getItem('monclerReceiptData');
+      if (storedData) {
+        try {
+          setReceiptData(JSON.parse(storedData));
+        } catch (e) {}
+      }
     }
-  }, []);
+  }, [serverReceiptData, receiptId]);
 
   if (!receiptData) {
     return (
@@ -66,7 +140,7 @@ export default function MonclerReceipt() {
               </h1>
               
               <div className="text-base text-black leading-relaxed">
-                <p>Dear {receiptData.FIRST_NAME},</p>
+                <p>Dear {receiptData?.FIRST_NAME},</p>
                 <br />
                 <p>Thank you for choosing Moncler!</p>
                 <p>Your order has been received.</p>
@@ -86,7 +160,7 @@ export default function MonclerReceipt() {
                   Order number<br />{receiptData.ORDER_NUMBER}
                 </p>
                 <p className="text-sm text-black">
-                  Order date: {receiptData.DATE}
+                  Order date: {receiptData?.DATE}
                 </p>
               </div>
             </div>
@@ -233,3 +307,33 @@ export default function MonclerReceipt() {
     </>
   );
 }
+
+export const getServerSideProps: GetServerSideProps = async (context) => {
+  const { id } = context.query;
+
+  if (id && typeof id === 'string') {
+    try {
+      const receipt = await getReceiptData(id);
+      
+      if (receipt && receipt.receipt_type === 'moncler') {
+        return {
+          props: {
+            receiptData: receipt.receipt_data,
+            receiptId: id,
+          },
+        };
+      }
+    } catch (error) {
+      console.error('Error fetching receipt data:', error);
+    }
+  }
+
+  return {
+    props: {
+      receiptData: null,
+      receiptId: null,
+    },
+  };
+};
+
+export default MonclerReceiptPage;

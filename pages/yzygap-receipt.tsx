@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from "react";
 import Head from "next/head";
+import { GetServerSideProps } from 'next';
+import { getReceiptData } from '@/lib/receipt-data';
 
 interface YzyGapReceiptProps {
   ORDER_NUMBER: string;
@@ -47,17 +49,30 @@ const defaultProps: YzyGapReceiptProps = {
   CARD_ENDING: "5678"
 };
 
-const YzyGapReceiptPage: React.FC = () => {
-  const [receiptData, setReceiptData] = useState<YzyGapReceiptProps>(defaultProps);
+interface YzyGapReceiptPageProps {
+  receiptData?: YzyGapReceiptProps;
+  receiptId?: string;
+}
+
+const YzyGapReceiptPage: React.FC<YzyGapReceiptPageProps> = ({ 
+  receiptData: serverReceiptData, 
+  receiptId 
+}) => {
+  const [receiptData, setReceiptData] = useState<YzyGapReceiptProps>(
+    serverReceiptData || defaultProps
+  );
 
   useEffect(() => {
-    const storedData = localStorage.getItem('yzygapReceiptData');
-    if (storedData) {
-      try {
-        setReceiptData(JSON.parse(storedData));
-      } catch (e) {}
+    // Fallback to localStorage if no server data and no receiptId
+    if (!serverReceiptData && !receiptId) {
+      const storedData = localStorage.getItem('yzygapReceiptData');
+      if (storedData) {
+        try {
+          setReceiptData(JSON.parse(storedData));
+        } catch (e) {}
+      }
     }
-  }, []);
+  }, [serverReceiptData, receiptId]);
 
   return (
     <>
@@ -128,6 +143,35 @@ const YzyGapReceiptPage: React.FC = () => {
       </div>
     </>
   );
+};
+
+
+export const getServerSideProps: GetServerSideProps = async (context) => {
+  const { id } = context.query;
+
+  if (id && typeof id === 'string') {
+    try {
+      const receipt = await getReceiptData(id);
+      
+      if (receipt && receipt.receipt_type === 'yzygap') {
+        return {
+          props: {
+            receiptData: receipt.receipt_data,
+            receiptId: id,
+          },
+        };
+      }
+    } catch (error) {
+      console.error('Error fetching receipt data:', error);
+    }
+  }
+
+  return {
+    props: {
+      receiptData: null,
+      receiptId: null,
+    },
+  };
 };
 
 export default YzyGapReceiptPage;

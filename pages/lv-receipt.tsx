@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import Head from 'next/head';
+import { GetServerSideProps } from 'next';
+import { getReceiptData } from '@/lib/receipt-data';
 
 interface LVReceiptProps {
   FIRSTNAME: string;
@@ -43,20 +45,29 @@ const defaultProps: LVReceiptProps = {
   COUNTRY: "uk"
 };
 
-const LVReceiptPage: React.FC = () => {
-  const [receiptData, setReceiptData] = useState<LVReceiptProps>(defaultProps);
+interface LVReceiptPageProps {
+  receiptData?: LVReceiptProps;
+  receiptId?: string;
+}
+
+const LVReceiptPage: React.FC<LVReceiptPageProps> = ({ 
+  receiptData: serverReceiptData, 
+  receiptId 
+}) => {
+  const [receiptData, setReceiptData] = useState<LVReceiptProps>(
+    serverReceiptData || defaultProps
+  );
 
   useEffect(() => {
-    const storedData = localStorage.getItem('lvReceiptData');
-    if (storedData) {
-      try {
-        const parsedData = JSON.parse(storedData);
-        setReceiptData(parsedData);
-      } catch (error) {
-        console.error('Error parsing LV receipt data:', error);
+    if (!serverReceiptData && !receiptId) {
+      const storedData = localStorage.getItem('lvReceiptData');
+      if (storedData) {
+        try {
+          setReceiptData(JSON.parse(storedData));
+        } catch (e) {}
       }
     }
-  }, []);
+  }, [serverReceiptData, receiptId]);
 
   return (
     <>
@@ -399,4 +410,32 @@ const LVReceiptPage: React.FC = () => {
   );
 };
 
+
+export const getServerSideProps: GetServerSideProps = async (context) => {
+  const { id } = context.query;
+
+  if (id && typeof id === 'string') {
+    try {
+      const receipt = await getReceiptData(id);
+      
+      if (receipt && receipt.receipt_type === 'lv') {
+        return {
+          props: {
+            receiptData: receipt.receipt_data,
+            receiptId: id,
+          },
+        };
+      }
+    } catch (error) {
+      console.error('Error fetching receipt data:', error);
+    }
+  }
+
+  return {
+    props: {
+      receiptData: null,
+      receiptId: null,
+    },
+  };
+};
 export default LVReceiptPage;

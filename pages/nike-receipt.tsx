@@ -1,53 +1,82 @@
 "use client";
 
 import { useEffect, useState } from "react";
-
-interface NikeReceiptData {
-  WHOLE_NAME: string;
-  ADDRESS1: string;
-  ADDRESS2: string;
-  ADDRESS3: string;
-  FIRSTNAME: string;
-  DELIVERY_DATE: string;
-  PRODUCT_IMAGE: string;
-  PRODUCT_NAME: string;
-  PRICE: string;
-  SIZE: string;
+import { GetServerSideProps } from 'next';
+import { getReceiptData } from '@/lib/receipt-data';
+interface NikeReceiptProps {
   ORDER_NUMBER: string;
   ORDER_DATE: string;
-  CARD_END: string;
-  CURRENCY: string;
-  TOTAL: string;
+  CUSTOMER_NAME: string;
+  CUSTOMER_EMAIL: string;
+  PRODUCT_IMAGE: string;
+  PRODUCT_NAME: string;
+  PRODUCT_SIZE: string;
+  PRODUCT_COLOR: string;
+  PRODUCT_PRICE: string;
+  QUANTITY: string;
+  SUBTOTAL: string;
+  SHIPPING_COST: string;
+  TAX_AMOUNT: string;
+  TOTAL_AMOUNT: string;
+  TRACKING_NUMBER: string;
+  ESTIMATED_DELIVERY: string;
+  SHIPPING_ADDRESS_1: string;
+  SHIPPING_ADDRESS_2: string;
+  SHIPPING_ADDRESS_3: string;
+  SHIPPING_ADDRESS_4: string;
+  PAYMENT_METHOD: string;
+  CARD_ENDING: string;
 }
 
-export default function NikeReceiptPage() {
-  const [receiptData, setReceiptData] = useState<NikeReceiptData | null>(null);
+const defaultProps: NikeReceiptProps = {
+  ORDER_NUMBER: "NK123456789",
+  ORDER_DATE: "December 1, 2024",
+  CUSTOMER_NAME: "John Doe",
+  CUSTOMER_EMAIL: "john.doe@example.com",
+  PRODUCT_IMAGE: "/nike/nike_files/product-image.jpg",
+  PRODUCT_NAME: "Air Force 1 '07",
+  PRODUCT_SIZE: "10",
+  PRODUCT_COLOR: "White/White",
+  PRODUCT_PRICE: "$110.00",
+  QUANTITY: "1",
+  SUBTOTAL: "$110.00",
+  SHIPPING_COST: "Free",
+  TAX_AMOUNT: "$9.90",
+  TOTAL_AMOUNT: "$119.90",
+  TRACKING_NUMBER: "1Z999AA1234567890",
+  ESTIMATED_DELIVERY: "December 5, 2024",
+  SHIPPING_ADDRESS_1: "John Doe",
+  SHIPPING_ADDRESS_2: "123 Main Street",
+  SHIPPING_ADDRESS_3: "Portland, OR 97201",
+  SHIPPING_ADDRESS_4: "United States",
+  PAYMENT_METHOD: "Visa",
+  CARD_ENDING: "1234"
+};
+
+interface NikeReceiptPageProps {
+  receiptData?: NikeReceiptProps;
+  receiptId?: string;
+}
+
+const NikeReceiptPage: React.FC<NikeReceiptPageProps> = ({ 
+  receiptData: serverReceiptData, 
+  receiptId 
+}) => {
+  const [receiptData, setReceiptData] = useState<NikeReceiptProps>(
+    serverReceiptData || defaultProps
+  );
 
   useEffect(() => {
-    const storedData = localStorage.getItem('nikeReceiptData');
-    if (storedData) {
-      setReceiptData(JSON.parse(storedData));
-    } else {
-      // Default data if none found
-      setReceiptData({
-        WHOLE_NAME: "John Smith",
-        ADDRESS1: "123 Main Street",
-        ADDRESS2: "London",
-        ADDRESS3: "SW1A 1AA, United Kingdom",
-        FIRSTNAME: "John",
-        DELIVERY_DATE: "Monday, December 2, 2024",
-        PRODUCT_IMAGE: "/nike/nike_files/product-image.jpg",
-        PRODUCT_NAME: "Air Max 270 React",
-        PRICE: "£120.00",
-        SIZE: "UK 9",
-        ORDER_NUMBER: "N123456789",
-        ORDER_DATE: "November 30, 2024",
-        CARD_END: "1234",
-        CURRENCY: "£",
-        TOTAL: "£120.00"
-      });
+    if (!serverReceiptData && !receiptId) {
+      const storedData = localStorage.getItem('nikeReceiptData');
+      if (storedData) {
+        try {
+          setReceiptData(JSON.parse(storedData));
+        } catch (e) {}
+      }
     }
-  }, []);
+  }, [serverReceiptData, receiptId]);
+
 
   if (!receiptData) {
     return <div>Loading...</div>;
@@ -431,3 +460,32 @@ export default function NikeReceiptPage() {
     </html>
   );
 }
+
+
+export const getServerSideProps: GetServerSideProps = async (context) => {
+  const { id } = context.query;
+
+  if (id && typeof id === 'string') {
+    try {
+      const receipt = await getReceiptData(id);
+      
+      if (receipt && receipt.receipt_type === 'nike') {
+        return {
+          props: {
+            receiptData: receipt.receipt_data,
+            receiptId: id,
+          },
+        };
+      }
+    } catch (error) {
+      console.error('Error fetching receipt data:', error);
+    }
+  }
+
+  return {
+    props: {
+      receiptData: null,
+      receiptId: null,
+    },
+  };
+};

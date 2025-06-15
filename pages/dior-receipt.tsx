@@ -2,6 +2,8 @@
 
 import React, { useState, useEffect } from 'react';
 import Head from 'next/head';
+import { GetServerSideProps } from 'next';
+import { getReceiptData } from '@/lib/receipt-data';
 
 interface DiorReceiptProps {
   ORDER_NUMBER: string;
@@ -54,21 +56,29 @@ const defaultProps: DiorReceiptProps = {
   PAYMENT_METHOD: "Visa",
   CARD_ENDING: "1234"
 };
+interface DiorReceiptPageProps {
+  receiptData?: DiorReceiptProps;
+  receiptId?: string;
+}
 
-const DiorReceiptPage: React.FC = () => {
-  const [receiptData, setReceiptData] = useState<DiorReceiptProps>(defaultProps);
+const DiorReceiptPage: React.FC<DiorReceiptPageProps> = ({ 
+  receiptData: serverReceiptData, 
+  receiptId 
+}) => {
+  const [receiptData, setReceiptData] = useState<DiorReceiptProps>(
+    serverReceiptData || defaultProps
+  );
 
   useEffect(() => {
-    const storedData = localStorage.getItem('diorReceiptData');
-    if (storedData) {
-      try {
-        const parsedData = JSON.parse(storedData);
-        setReceiptData(parsedData);
-      } catch (error) {
-        console.error('Error parsing Dior receipt data:', error);
+    if (!serverReceiptData && !receiptId) {
+      const storedData = localStorage.getItem('diorReceiptData');
+      if (storedData) {
+        try {
+          setReceiptData(JSON.parse(storedData));
+        } catch (e) {}
       }
     }
-  }, []);
+  }, [serverReceiptData, receiptId]);
 
   return (
     <>
@@ -334,6 +344,34 @@ const DiorReceiptPage: React.FC = () => {
       </div>
     </>
   );
+};
+
+export const getServerSideProps: GetServerSideProps = async (context) => {
+  const { id } = context.query;
+
+  if (id && typeof id === 'string') {
+    try {
+      const receipt = await getReceiptData(id);
+      
+      if (receipt && receipt.receipt_type === 'dior') {
+        return {
+          props: {
+            receiptData: receipt.receipt_data,
+            receiptId: id,
+          },
+        };
+      }
+    } catch (error) {
+      console.error('Error fetching receipt data:', error);
+    }
+  }
+
+  return {
+    props: {
+      receiptData: null,
+      receiptId: null,
+    },
+  };
 };
 
 export default DiorReceiptPage;

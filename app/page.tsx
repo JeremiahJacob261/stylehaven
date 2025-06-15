@@ -799,8 +799,7 @@ export default function Home() {
       
       // Show email option after a short delay
       setTimeout(() => {
-        const shouldEmail = confirm('Receipt generated! Would you like to email this receipt to yourself?')
-        if (shouldEmail) {
+       if (true) {
           sendReceiptEmail(selectedReceiptType, receiptData)
         }
       }, 1500)

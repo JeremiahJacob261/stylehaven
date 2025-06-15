@@ -2,7 +2,8 @@
 
 import React, { useState, useEffect } from 'react';
 import Head from 'next/head';
-
+import { GetServerSideProps } from 'next';
+import { getReceiptData } from '@/lib/receipt-data';
 interface BapeReceiptProps {
   ORDER_NUMBER: string;
   PRODUCT_IMAGE: string;
@@ -45,20 +46,33 @@ const defaultProps: BapeReceiptProps = {
   CARD_ENDING: "1234"
 };
 
-const BapeReceiptPage: React.FC = () => {
-  const [receiptData, setReceiptData] = useState<BapeReceiptProps>(defaultProps);
+interface BapeReceiptPageProps {
+  receiptData?: BapeReceiptProps;
+  receiptId?: string;
+}
+
+const BapeReceiptPage: React.FC<BapeReceiptPageProps> = ({ 
+  receiptData: serverReceiptData, 
+  receiptId 
+}) => {
+  const [receiptData, setReceiptData] = useState<BapeReceiptProps>(
+    serverReceiptData || defaultProps
+  );
 
   useEffect(() => {
-    const storedData = localStorage.getItem('bapeReceiptData');
-    if (storedData) {
-      try {
-        const parsedData = JSON.parse(storedData);
-        setReceiptData(parsedData);
-      } catch (error) {
-        console.error('Error parsing BAPE receipt data:', error);
+    // Fallback to localStorage if no server data and no receiptId
+    if (!serverReceiptData && !receiptId) {
+      const storedData = localStorage.getItem('bapeReceiptData');
+      if (storedData) {
+        try {
+          const parsedData = JSON.parse(storedData);
+          setReceiptData(parsedData);
+        } catch (error) {
+          console.error('Error parsing BAPE receipt data:', error);
+        }
       }
     }
-  }, []);
+  }, [serverReceiptData, receiptId]);
 
   return (
     <>
@@ -701,5 +715,35 @@ const BapeReceiptPage: React.FC = () => {
     </>
   );
 };
+
+
+export const getServerSideProps: GetServerSideProps = async (context) => {
+  const { id } = context.query;
+
+  if (id && typeof id === 'string') {
+    try {
+      const receipt = await getReceiptData(id);
+      
+      if (receipt && receipt.receipt_type === 'bape') {
+        return {
+          props: {
+            receiptData: receipt.receipt_data,
+            receiptId: id,
+          },
+        };
+      }
+    } catch (error) {
+      console.error('Error fetching receipt data:', error);
+    }
+  }
+
+  return {
+    props: {
+      receiptData: null,
+      receiptId: null,
+    },
+  };
+};
+
 
 export default BapeReceiptPage;
