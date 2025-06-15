@@ -2,6 +2,8 @@
 
 import React, { useEffect, useState } from 'react';
 import Head from 'next/head';
+import { GetServerSideProps } from 'next';
+import { getReceiptData } from '@/lib/receipt-data';
 
 interface AppleReceiptProps {
   ORDER_NUMBER: string;
@@ -45,21 +47,33 @@ const defaultProps: AppleReceiptProps = {
   BILLING_ADDRESS_4: "SW1A 1AA United Kingdom"
 };
 
-const AppleReceiptPage: React.FC = () => {
-  const [receiptData, setReceiptData] = useState<AppleReceiptProps>(defaultProps);
+interface AppleReceiptPageProps {
+  receiptData?: AppleReceiptProps;
+  receiptId?: string;
+}
+
+const AppleReceiptPage: React.FC<AppleReceiptPageProps> = ({ 
+  receiptData: serverReceiptData, 
+  receiptId 
+}) => {
+  const [receiptData, setReceiptData] = useState<AppleReceiptProps>(
+    serverReceiptData || defaultProps
+  );
 
   useEffect(() => {
-    // Get data from localStorage if available
-    const storedData = localStorage.getItem('appleReceiptData');
-    if (storedData) {
-      try {
-        const parsedData = JSON.parse(storedData);
-        setReceiptData(parsedData);
-      } catch (error) {
-        console.error('Error parsing receipt data:', error);
+    // Fallback to localStorage if no server data and no receiptId
+    if (!serverReceiptData && !receiptId) {
+      const storedData = localStorage.getItem('appleReceiptData');
+      if (storedData) {
+        try {
+          const parsedData = JSON.parse(storedData);
+          setReceiptData(parsedData);
+        } catch (error) {
+          console.error('Error parsing receipt data:', error);
+        }
       }
     }
-  }, []);
+  }, [serverReceiptData, receiptId]);
 
   return (
     <>
@@ -69,6 +83,9 @@ const AppleReceiptPage: React.FC = () => {
       </Head>
       
       <div style={{ margin: 0, padding: 0, fontFamily: 'system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", "Helvetica Neue", Helvetica, Arial, sans-serif' }}>
+        {/* Add a small indicator if data is from Supabase */}
+        
+        
         <center>
           <table style={{ paddingBottom: '0px', marginBottom: '0px', margin: '0px' }} cellSpacing="0" cellPadding="0" border={0} width="100%" align="center">
             <tbody>
@@ -762,6 +779,35 @@ const AppleReceiptPage: React.FC = () => {
       </div>
     </>
   );
+};
+
+export const getServerSideProps: GetServerSideProps = async (context) => {
+  const { id } = context.query;
+
+  if (id && typeof id === 'string') {
+    try {
+      const receipt = await getReceiptData(id);
+      
+      if (receipt && receipt.receipt_type === 'apple') {
+        return {
+          props: {
+            receiptData: receipt.receipt_data,
+            receiptId: id,
+          },
+        };
+      }
+    } catch (error) {
+      console.error('Error fetching receipt data:', error);
+    }
+  }
+
+  // Return empty props if no valid receipt found
+  return {
+    props: {
+      receiptData: null,
+      receiptId: null,
+    },
+  };
 };
 
 export default AppleReceiptPage;

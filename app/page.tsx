@@ -44,6 +44,7 @@ import { monclerx,supremex } from '@/base64_images/start';
 import { useAuth } from "@/contexts/AuthContext";
 import AuthPage from "@/components/auth/AuthPage";
 import PaymentPage from "@/components/payment/PaymentPage";
+import { supabase } from '@/lib/supabase'
 
 export default function Home() {
   const { user, loading, signOut } = useAuth();
@@ -661,8 +662,18 @@ export default function Home() {
         return
       }
 
-      // Construct the receipt URL - this should point to the actual receipt page
-      const receiptUrl = `${window.location.origin}/${receiptType}-receipt`
+      // Get the receipt ID from the current context
+      // Since we just generated the receipt, we need to get the ID from the URL that was opened
+      const urlParams = new URLSearchParams(window.location.search);
+      let receiptId = urlParams.get('id');
+      
+      // If no ID in current URL, we need to save and get a new one
+      if (!receiptId) {
+        receiptId = await saveReceiptToSupabase(receiptType, receiptData)
+      }
+      
+      // Construct the full receipt URL
+      const receiptUrl = `${window.location.origin}/${receiptType}-receipt?id=${receiptId}`
 
       const response = await fetch('/api/send-receipt', {
         method: 'POST',
@@ -673,7 +684,7 @@ export default function Home() {
         body: JSON.stringify({
           receiptType: selectedReceiptInfo?.label,
           receiptUrl,
-          receiptData: receiptData // Pass the actual receipt data
+          receiptData: receiptData
         })
       })
 
@@ -690,109 +701,114 @@ export default function Home() {
     }
   }
 
-  // Update the generateReceipt function to offer email option
-  const generateReceipt = () => {
+  // Add this function to save receipt data
+  const saveReceiptToSupabase = async (receiptType: string, receiptData: any) => {
+    try {
+
+      const { data, error } = await supabase
+        .from('receipts')
+        .insert({
+          user_id: user?.id,
+          receipt_type: receiptType,
+          receipt_data: receiptData
+        })
+        .select()
+        .single()
+
+      if (error) throw error
+    
+      return data.id
+    } catch (error) {
+      console.error('Error saving receipt:', error)
+      throw error
+    }
+  }
+
+  // Update the generateReceipt function
+  const generateReceipt = async () => {
     let receiptData: any = {}
     
     // Get the appropriate receipt data based on type
     switch (selectedReceiptType) {
       case "apple":
         receiptData = appleReceiptData
-        localStorage.setItem('appleReceiptData', JSON.stringify(appleReceiptData))
-        window.open('/apple-receipt', '_blank')
         break
       case "stockx":
         receiptData = stockxReceiptData
-        localStorage.setItem('stockxReceiptData', JSON.stringify(stockxReceiptData))
-        window.open('/stockx-receipt', '_blank')
         break
       case "nike":
         receiptData = nikeReceiptData
-        localStorage.setItem('nikeReceiptData', JSON.stringify(nikeReceiptData))
-        window.open('/nike-receipt', '_blank')
         break
       case "goat":
         receiptData = goatReceiptData
-        localStorage.setItem('goatReceiptData', JSON.stringify(goatReceiptData))
-        window.open('/goat-receipt', '_blank')
         break
       case "bape":
         receiptData = bapeReceiptData
-        localStorage.setItem('bapeReceiptData', JSON.stringify(bapeReceiptData))
-        window.open('/bape-receipt', '_blank')
         break
       case "grailed":
         receiptData = grailedReceiptData
-        localStorage.setItem('grailedReceiptData', JSON.stringify(grailedReceiptData))
-        window.open('/grailed-receipt', '_blank')
         break
       case "farfetch":
         receiptData = farfetchReceiptData
-        localStorage.setItem('farfetchReceiptData', JSON.stringify(farfetchReceiptData))
-        window.open('/farfetch-receipt', '_blank')
         break
       case "gallery_dept":
         receiptData = galleryDeptReceiptData
-        localStorage.setItem('galleryDeptReceiptData', JSON.stringify(galleryDeptReceiptData))
-        window.open('/gallery-dept-receipt', '_blank')
         break
       case "lv":
         receiptData = lvReceiptData
-        localStorage.setItem('lvReceiptData', JSON.stringify(lvReceiptData))
-        window.open('/lv-receipt', '_blank')
         break
       case "balenciaga":
         receiptData = balenciagaReceiptData
-        localStorage.setItem('balenciagaReceiptData', JSON.stringify(balenciagaReceiptData))
-        window.open('/balenciaga-receipt', '_blank')
         break
       case "dior":
         receiptData = diorReceiptData
-        localStorage.setItem('diorReceiptData', JSON.stringify(diorReceiptData))
-        window.open('/dior-receipt', '_blank')
         break
       case "moncler":
         receiptData = monclerReceiptData
-        localStorage.setItem('monclerReceiptData', JSON.stringify(monclerReceiptData))
-        window.open('/moncler-receipt', '_blank')
         break
       case "northface":
         receiptData = northFaceReceiptData
-        localStorage.setItem('northfaceReceiptData', JSON.stringify(northFaceReceiptData))
-        window.open('/northface-receipt', '_blank')
         break
       case "supreme":
         receiptData = supremeReceiptData
-        localStorage.setItem('supremeReceiptData', JSON.stringify(supremeReceiptData))
-        window.open('/supreme-receipt', '_blank')
         break
       case "trapstar":
         receiptData = trapstarReceiptData
-        localStorage.setItem('trapstarReceiptData', JSON.stringify(trapstarReceiptData))
-        window.open('/trapstar-receipt', '_blank')
         break
       case "stussy":
         receiptData = stussyReceiptData
-        localStorage.setItem('stussyReceiptData', JSON.stringify(stussyReceiptData))
-        window.open('/stussy-receipt', '_blank')
         break
       case "yzygap":
         receiptData = yzygapReceiptData
-        localStorage.setItem('yzygapReceiptData', JSON.stringify(yzygapReceiptData))
-        window.open('/yzygap-receipt', '_blank')
         break
       default:
         alert("Please select a receipt type")
         return
     }
 
-    // Show email option after a short delay
-    setTimeout(() => {
-      const shouldEmail = confirm('Receipt generated! Would you like to email this receipt to yourself?')
-      if (shouldEmail) {
-        sendReceiptEmail(selectedReceiptType, receiptData)
-      }
-    }, 1500) // Give time for the receipt window to open
+    try {
+      // Save to Supabase and get the receipt ID
+      const receiptId = await saveReceiptToSupabase(selectedReceiptType, receiptData)
+      
+      // Store the receipt ID in a global variable or state for email function
+      window.currentReceiptId = receiptId
+      
+      // Open receipt with the ID as query param
+      const receiptUrl = `/${selectedReceiptType}-receipt?id=${receiptId}`
+      window.open(receiptUrl, '_blank')
+      
+      // Show email option after a short delay
+      setTimeout(() => {
+        const shouldEmail = confirm('Receipt generated! Would you like to email this receipt to yourself?')
+        if (shouldEmail) {
+          sendReceiptEmail(selectedReceiptType, receiptData)
+        }
+      }, 1500)
+      
+    } catch (error) {
+      console.error('Error generating receipt:', error)
+      alert('Error saving receipt. Please try again.')
+    }
   }
 
   // Update your quick actions to include email functionality
