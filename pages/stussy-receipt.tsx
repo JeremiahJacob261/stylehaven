@@ -1,5 +1,9 @@
-import React, { useState, useEffect } from "react";
-import Head from "next/head";
+"use client";
+
+import React, { useState, useEffect } from 'react';
+import Head from 'next/head';
+import { GetServerSideProps } from 'next';
+import { getReceiptData } from '@/lib/receipt-data';
 
 interface StussyReceiptProps {
   ORDER_NUMBER: string;
@@ -8,8 +12,8 @@ interface StussyReceiptProps {
   CUSTOMER_EMAIL: string;
   PRODUCT_IMAGE: string;
   PRODUCT_NAME: string;
-  PRODUCT_SIZE: string;
   PRODUCT_COLOR: string;
+  PRODUCT_SIZE: string;
   PRODUCT_PRICE: string;
   QUANTITY: string;
   SUBTOTAL: string;
@@ -20,51 +24,72 @@ interface StussyReceiptProps {
   SHIPPING_ADDRESS_2: string;
   SHIPPING_ADDRESS_3: string;
   SHIPPING_ADDRESS_4: string;
+  BILLING_ADDRESS_1: string;
+  BILLING_ADDRESS_2: string;
+  BILLING_ADDRESS_3: string;
+  BILLING_ADDRESS_4: string;
   PAYMENT_METHOD: string;
   CARD_ENDING: string;
 }
 
 const defaultProps: StussyReceiptProps = {
-  ORDER_NUMBER: "STU123456789",
+  ORDER_NUMBER: "ST123456789",
   ORDER_DATE: "December 1, 2024",
   CUSTOMER_NAME: "John Doe",
   CUSTOMER_EMAIL: "john.doe@example.com",
   PRODUCT_IMAGE: "/stussy/stussy_files/product-image.jpg",
-  PRODUCT_NAME: "Stussy 8 Ball Tee",
-  PRODUCT_SIZE: "L",
+  PRODUCT_NAME: "Stock Logo Hoodie",
   PRODUCT_COLOR: "Black",
-  PRODUCT_PRICE: "$50.00",
+  PRODUCT_SIZE: "L",
+  PRODUCT_PRICE: "$120",
   QUANTITY: "1",
-  SUBTOTAL: "$50.00",
-  SHIPPING_COST: "$10.00",
-  TAX_AMOUNT: "$5.00",
-  TOTAL_AMOUNT: "$65.00",
+  SUBTOTAL: "$120",
+  SHIPPING_COST: "$10",
+  TAX_AMOUNT: "$10.80",
+  TOTAL_AMOUNT: "$140.80",
   SHIPPING_ADDRESS_1: "John Doe",
-  SHIPPING_ADDRESS_2: "123 Main Street",
-  SHIPPING_ADDRESS_3: "Los Angeles, CA 90001",
+  SHIPPING_ADDRESS_2: "123 Surf Street",
+  SHIPPING_ADDRESS_3: "Los Angeles, CA 90401",
   SHIPPING_ADDRESS_4: "United States",
-  PAYMENT_METHOD: "Visa",
-  CARD_ENDING: "1234"
+  BILLING_ADDRESS_1: "John Doe",
+  BILLING_ADDRESS_2: "123 Surf Street",
+  BILLING_ADDRESS_3: "Los Angeles, CA 90401",
+  BILLING_ADDRESS_4: "United States",
+  PAYMENT_METHOD: "American Express",
+  CARD_ENDING: "7890"
 };
 
-const StussyReceiptPage: React.FC = () => {
-  const [receiptData, setReceiptData] = useState<StussyReceiptProps>(defaultProps);
+interface StussyReceiptPageProps {
+  receiptData?: StussyReceiptProps;
+  receiptId?: string;
+}
+
+const StussyReceiptPage: React.FC<StussyReceiptPageProps> = ({ 
+  receiptData: serverReceiptData, 
+  receiptId 
+}) => {
+  const [receiptData, setReceiptData] = useState<StussyReceiptProps>(
+    serverReceiptData || defaultProps
+  );
 
   useEffect(() => {
-    const storedData = localStorage.getItem('stussyReceiptData');
-    if (storedData) {
-      try {
-        setReceiptData(JSON.parse(storedData));
-      } catch (e) {}
+    if (!serverReceiptData && !receiptId) {
+      const storedData = localStorage.getItem('stussyReceiptData');
+      if (storedData) {
+        try {
+          setReceiptData(JSON.parse(storedData));
+        } catch (e) {}
+      }
     }
-  }, []);
+  }, [serverReceiptData, receiptId]);
 
   return (
     <>
       <Head>
-        <title>Stussy - Order Confirmation</title>
+        <title>{`Stüssy - Order ${receiptData.ORDER_NUMBER}`}</title>
         <meta name="viewport" content="width=device-width, initial-scale=1" />
       </Head>
+      
       <div className="email-container" style={{maxWidth:600,margin:"0 auto",background:"#fff",fontFamily:"Helvetica Neue,Helvetica,Arial,sans-serif"}}>
         <div style={{background:"#000",padding:"30px 0",textAlign:"center"}}>
           <span style={{color:"#fff",fontSize:36,fontWeight:900,letterSpacing:8,textTransform:"uppercase"}}>STÜSSY</span>
@@ -117,6 +142,13 @@ const StussyReceiptPage: React.FC = () => {
             <p>{receiptData.SHIPPING_ADDRESS_4}</p>
           </div>
           <div style={{background:"#f8f8f8",padding:20,margin:"30px 0",borderLeft:"4px solid #000"}}>
+            <h4 style={{fontSize:16,fontWeight:700,marginBottom:10,color:"#000",textTransform:"uppercase"}}>Billing Address</h4>
+            <p>{receiptData.BILLING_ADDRESS_1}</p>
+            <p>{receiptData.BILLING_ADDRESS_2}</p>
+            <p>{receiptData.BILLING_ADDRESS_3}</p>
+            <p>{receiptData.BILLING_ADDRESS_4}</p>
+          </div>
+          <div style={{background:"#f8f8f8",padding:20,margin:"30px 0",borderLeft:"4px solid #000"}}>
             <h4 style={{fontSize:16,fontWeight:700,marginBottom:10,color:"#000",textTransform:"uppercase"}}>Payment Information</h4>
             <p><strong>Payment Method:</strong> {receiptData.PAYMENT_METHOD} ending in {receiptData.CARD_ENDING}</p>
           </div>
@@ -128,6 +160,34 @@ const StussyReceiptPage: React.FC = () => {
       </div>
     </>
   );
+};
+
+export const getServerSideProps: GetServerSideProps = async (context) => {
+  const { id } = context.query;
+
+  if (id && typeof id === 'string') {
+    try {
+      const receipt = await getReceiptData(id);
+      
+      if (receipt && receipt.receipt_type === 'stussy') {
+        return {
+          props: {
+            receiptData: receipt.receipt_data,
+            receiptId: id,
+          },
+        };
+      }
+    } catch (error) {
+      console.error('Error fetching receipt data:', error);
+    }
+  }
+
+  return {
+    props: {
+      receiptData: null,
+      receiptId: null,
+    },
+  };
 };
 
 export default StussyReceiptPage;

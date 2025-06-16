@@ -1,28 +1,88 @@
 "use client";
 
-import { useEffect, useState } from 'react';
-import { NorthFaceReceiptData } from '@/types/receipt-types';
+import React, { useState, useEffect } from 'react';
+import Head from 'next/head';
+import { GetServerSideProps } from 'next';
+import { getReceiptData } from '@/lib/receipt-data';
 
-export default function NorthFaceReceipt() {
-  const [receiptData, setReceiptData] = useState<NorthFaceReceiptData | null>(null);
+interface NorthFaceReceiptProps {
+  ORDER_NUMBER: string;
+  ORDER_DATE: string;
+  CUSTOMER_NAME: string;
+  CUSTOMER_EMAIL: string;
+  PRODUCT_IMAGE: string;
+  PRODUCT_NAME: string;
+  PRODUCT_COLOR: string;
+  PRODUCT_SIZE: string;
+  PRODUCT_PRICE: string;
+  QUANTITY: string;
+  SUBTOTAL: string;
+  SHIPPING_COST: string;
+  TAX_AMOUNT: string;
+  TOTAL_AMOUNT: string;
+  SHIPPING_ADDRESS_1: string;
+  SHIPPING_ADDRESS_2: string;
+  SHIPPING_ADDRESS_3: string;
+  SHIPPING_ADDRESS_4: string;
+  BILLING_ADDRESS_1: string;
+  BILLING_ADDRESS_2: string;
+  BILLING_ADDRESS_3: string;
+  SHIPPING_METHOD?: string;
+  BILLING_ADDRESS_4: string;
+  PAYMENT_METHOD: string;
+  CARD_ENDING: string;
+}
+
+const defaultProps: NorthFaceReceiptProps = {
+  ORDER_NUMBER: "TNF123456789",
+  ORDER_DATE: "December 1, 2024",
+  CUSTOMER_NAME: "John Doe",
+  CUSTOMER_EMAIL: "john.doe@example.com",
+  PRODUCT_IMAGE: "/northface/northface_files/product-image.jpg",
+  PRODUCT_NAME: "1996 Retro Nuptse Jacket",
+  PRODUCT_COLOR: "TNF Black",
+  PRODUCT_SIZE: "L",
+  PRODUCT_PRICE: "$379",
+  QUANTITY: "1",
+  SUBTOTAL: "$379",
+  SHIPPING_COST: "Free",
+  TAX_AMOUNT: "$34.11",
+  TOTAL_AMOUNT: "$413.11",
+  SHIPPING_ADDRESS_1: "John Doe",
+  SHIPPING_ADDRESS_2: "123 Mountain View",
+  SHIPPING_ADDRESS_3: "Denver, CO 80202",
+  SHIPPING_ADDRESS_4: "United States",
+  BILLING_ADDRESS_1: "John Doe",
+  BILLING_ADDRESS_2: "123 Mountain View",
+  BILLING_ADDRESS_3: "Denver, CO 80202",
+  BILLING_ADDRESS_4: "United States",
+  PAYMENT_METHOD: "Visa",
+  CARD_ENDING: "4567"
+};
+
+interface NorthFaceReceiptPageProps {
+  receiptData?: NorthFaceReceiptProps;
+  receiptId?: string;
+}
+
+const NorthFaceReceiptPage: React.FC<NorthFaceReceiptPageProps> = ({ 
+  receiptData: serverReceiptData, 
+  receiptId 
+}) => {
+  const [receiptData, setReceiptData] = useState<NorthFaceReceiptProps>(
+    serverReceiptData || defaultProps
+  );
 
   useEffect(() => {
-    const savedData = localStorage.getItem('northfaceReceiptData');
-    if (savedData) {
-      setReceiptData(JSON.parse(savedData));
+    if (!serverReceiptData && !receiptId) {
+      const storedData = localStorage.getItem('northFaceReceiptData');
+      if (storedData) {
+        try {
+          setReceiptData(JSON.parse(storedData));
+        } catch (e) {}
+      }
     }
-  }, []);
-
-  if (!receiptData) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center">
-          <h1 className="text-2xl font-bold mb-4">Loading...</h1>
-          <p>Please wait while we load your receipt data.</p>
-        </div>
-      </div>
-    );
-  }
+  }, [serverReceiptData, receiptId]);
 
   const handlePrint = () => {
     window.print();
@@ -30,7 +90,28 @@ export default function NorthFaceReceipt() {
 
   return (
     <>
-      <div className="min-h-screen bg-white font-sans" style={{ fontFamily: 'Helvetica, Arial, sans-serif' }}>
+      <Head>
+        <title>{`The North Face - Order ${receiptData.ORDER_NUMBER}`}</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+      </Head>
+      
+      <div>
+        {receiptId && (
+          <div style={{ 
+            position: 'fixed', 
+            top: 10, 
+            right: 10, 
+            background: '#4CAF50', 
+            color: 'white', 
+            padding: '5px 10px', 
+            borderRadius: '4px',
+            fontSize: '12px',
+            zIndex: 1000
+          }}>
+            Loaded from database
+          </div>
+        )}
+        
         {/* Print button - hidden during print */}
         {/* <div className="no-print fixed top-4 right-4 z-50">
           <button
@@ -218,4 +299,34 @@ export default function NorthFaceReceipt() {
       `}</style>
     </>
   );
-}
+};
+
+export const getServerSideProps: GetServerSideProps = async (context) => {
+  const { id } = context.query;
+
+  if (id && typeof id === 'string') {
+    try {
+      const receipt = await getReceiptData(id);
+      
+      if (receipt && receipt.receipt_type === 'northface') {
+        return {
+          props: {
+            receiptData: receipt.receipt_data,
+            receiptId: id,
+          },
+        };
+      }
+    } catch (error) {
+      console.error('Error fetching receipt data:', error);
+    }
+  }
+
+  return {
+    props: {
+      receiptData: null,
+      receiptId: null,
+    },
+  };
+};
+
+export default NorthFaceReceiptPage;

@@ -1,14 +1,24 @@
+"use client";
+
 import React, { useState, useEffect } from 'react';
 import Head from 'next/head';
+import { GetServerSideProps } from 'next';
+import { getReceiptData } from '@/lib/receipt-data';
 
 interface FarfetchReceiptProps {
-  FIRSTNAME: string;
-  ORDERNUMBER: string;
-  DELIVERY: string;
+  ORDER_NUMBER: string;
+  ORDER_DATE: string;
+  CUSTOMER_NAME: string;
+  CUSTOMER_EMAIL: string;
   PRODUCT_IMAGE: string;
-  BRAND: string;
-  FULLNAME: string;
+  PRODUCT_NAME: string;
+  PRODUCT_BRAND: string;
+  PRODUCT_COLOR: string;
+  PRODUCT_SIZE: string;
   PRODUCT_PRICE: string;
+  QUANTITY: string;
+  SUBTOTAL: string;
+  DELIVERY:string;
   SHIPPING_COST: string;
   TAX_AMOUNT: string;
   TOTAL_AMOUNT: string;
@@ -25,292 +35,187 @@ interface FarfetchReceiptProps {
 }
 
 const defaultProps: FarfetchReceiptProps = {
-  FIRSTNAME: "John",
-  ORDERNUMBER: "FF123456789",
-  DELIVERY: "December 5, 2024",
-  PRODUCT_IMAGE: "/farfetch/farfetch_files/PRODUCT_IMAGE",
-  BRAND: "Balenciaga",
-  FULLNAME: "Triple S Sneakers",
-  PRODUCT_PRICE: "€ 1,050",
-  SHIPPING_COST: "Free",
-  TAX_AMOUNT: "€ 200.00",
-  TOTAL_AMOUNT: "€ 1,050.00",
+  ORDER_NUMBER: "FF123456789",
+  ORDER_DATE: "December 1, 2024",
+  CUSTOMER_NAME: "John Doe",
+  CUSTOMER_EMAIL: "john.doe@example.com",
+  PRODUCT_IMAGE: "/farfetch/farfetch_files/product-image.jpg",
+  PRODUCT_NAME: "Oversized Logo T-Shirt",
+  PRODUCT_BRAND: "Off-White",
+  PRODUCT_COLOR: "Black",
+  PRODUCT_SIZE: "M",
+  PRODUCT_PRICE: "€ 395",
+  QUANTITY: "1",
+  SUBTOTAL: "€ 395",
+  DELIVERY: "Expected delivery by December 5, 2024",
+  SHIPPING_COST: "€ 20",
+  TAX_AMOUNT: "€ 79",
+  TOTAL_AMOUNT: "€ 494",
   SHIPPING_ADDRESS_1: "John Doe",
-  SHIPPING_ADDRESS_2: "123 Luxury Avenue",
-  SHIPPING_ADDRESS_3: "Paris 75001",
-  SHIPPING_ADDRESS_4: "France",
+  SHIPPING_ADDRESS_2: "123 Fashion Street",
+  SHIPPING_ADDRESS_3: "London, W1K 5AB",
+  SHIPPING_ADDRESS_4: "United Kingdom",
   BILLING_ADDRESS_1: "John Doe",
-  BILLING_ADDRESS_2: "123 Luxury Avenue",
-  BILLING_ADDRESS_3: "Paris 75001",
-  BILLING_ADDRESS_4: "France",
-  PAYMENT_METHOD: "Visa",
-  CARD_ENDING: "1234"
+  BILLING_ADDRESS_2: "123 Fashion Street",
+  BILLING_ADDRESS_3: "London, W1K 5AB",
+  BILLING_ADDRESS_4: "United Kingdom",
+  PAYMENT_METHOD: "Mastercard",
+  CARD_ENDING: "8901"
 };
 
-const FarfetchReceiptPage: React.FC = () => {
-  const [receiptData, setReceiptData] = useState<FarfetchReceiptProps>(defaultProps);
+interface FarfetchReceiptPageProps {
+  receiptData?: FarfetchReceiptProps;
+  receiptId?: string;
+}
+
+const FarfetchReceiptPage: React.FC<FarfetchReceiptPageProps> = ({ 
+  receiptData: serverReceiptData, 
+  receiptId 
+}) => {
+  const [receiptData, setReceiptData] = useState<FarfetchReceiptProps>(
+    serverReceiptData || defaultProps
+  );
 
   useEffect(() => {
-    const storedData = localStorage.getItem('farfetchReceiptData');
-    if (storedData) {
-      try {
-        const parsedData = JSON.parse(storedData);
-        setReceiptData(parsedData);
-      } catch (error) {
-        console.error('Error parsing Farfetch receipt data:', error);
+    if (!serverReceiptData && !receiptId) {
+      const storedData = localStorage.getItem('farfetchReceiptData');
+      if (storedData) {
+        try {
+          setReceiptData(JSON.parse(storedData));
+        } catch (e) {}
       }
     }
-  }, []);
+  }, [serverReceiptData, receiptId]);
 
   return (
     <>
       <Head>
-        <title>Farfetch - Order Confirmation</title>
+        <title>{`Farfetch - Order ${receiptData.ORDER_NUMBER}`}</title>
         <meta name="viewport" content="width=device-width, initial-scale=1" />
       </Head>
       
-      <style jsx global>{`
-        * {
-          margin: 0;
-          padding: 0;
-          box-sizing: border-box;
-        }
-
-        body {
-          font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
-          background-color: #f8f8f8;
-          color: #333;
-          line-height: 1.6;
-        }
-
-        .email-container {
-          max-width: 600px;
-          margin: 0 auto;
-          background-color: #ffffff;
-          box-shadow: 0 0 10px rgba(0,0,0,0.1);
-        }
-
-        .header {
-          background-color: #ffffff;
-          padding: 30px 40px;
-          text-align: center;
-          border-bottom: 1px solid #eee;
-        }
-
-        .header img {
-          max-width: 150px;
-          height: auto;
-        }
-
-        .content {
-          padding: 40px;
-        }
-
-        .greeting {
-          font-size: 24px;
-          font-weight: 300;
-          color: #000;
-          margin-bottom: 20px;
-        }
-
-        .order-info {
-          background-color: #f9f9f9;
-          padding: 20px;
-          margin-bottom: 30px;
-          border-radius: 4px;
-        }
-
-        .order-info h3 {
-          font-size: 18px;
-          font-weight: 500;
-          margin-bottom: 10px;
-          color: #000;
-        }
-
-        .order-info p {
-          margin: 5px 0;
-          font-size: 14px;
-          color: #666;
-        }
-
-        .product-section {
-          display: flex;
-          margin-bottom: 30px;
-          padding: 20px;
-          border: 1px solid #eee;
-          border-radius: 4px;
-        }
-
-        .product-image {
-          width: 120px;
-          height: 120px;
-          object-fit: cover;
-          margin-right: 20px;
-          border-radius: 4px;
-        }
-
-        .product-details {
-          flex: 1;
-        }
-
-        .product-details h4 {
-          font-size: 16px;
-          font-weight: 500;
-          color: #000;
-          margin-bottom: 5px;
-        }
-
-        .product-details .brand {
-          font-size: 14px;
-          color: #666;
-          margin-bottom: 10px;
-        }
-
-        .product-details .price {
-          font-size: 16px;
-          font-weight: 600;
-          color: #000;
-        }
-
-        .summary-table {
-          width: 100%;
-          border-collapse: collapse;
-          margin: 20px 0;
-        }
-
-        .summary-table td {
-          padding: 12px 0;
-          border-bottom: 1px solid #eee;
-          font-size: 14px;
-        }
-
-        .summary-table .label {
-          text-align: left;
-          color: #666;
-        }
-
-        .summary-table .value {
-          text-align: right;
-          font-weight: 500;
-        }
-
-        .total-row {
-          font-size: 16px;
-          font-weight: 600;
-          border-top: 2px solid #000 !important;
-        }
-
-        .addresses {
-          display: flex;
-          justify-content: space-between;
-          margin: 30px 0;
-          gap: 20px;
-        }
-
-        .address-block {
-          flex: 1;
-          background-color: #f9f9f9;
-          padding: 20px;
-          border-radius: 4px;
-        }
-
-        .address-block h4 {
-          font-size: 16px;
-          font-weight: 500;
-          margin-bottom: 10px;
-          color: #000;
-        }
-
-        .address-block p {
-          margin: 3px 0;
-          font-size: 14px;
-          color: #666;
-        }
-
-        .footer {
-          text-align: center;
-          padding: 30px;
-          background-color: #f5f5f5;
-          color: #999;
-          font-size: 12px;
-        }
-      `}</style>
-
-      <div className="email-container">
-        <div className="header">
-          <img src="/farfetch/farfetch_files/farfetch-logo.png" alt="Farfetch" />
-        </div>
+      <div>
+        {receiptId && (
+          <div style={{ 
+            position: 'fixed', 
+            top: 10, 
+            right: 10, 
+            background: '#4CAF50', 
+            color: 'white', 
+            padding: '5px 10px', 
+            borderRadius: '4px',
+            fontSize: '12px',
+            zIndex: 1000
+          }}>
+            Loaded from database
+          </div>
+        )}
         
-        <div className="content">
-          <h1 className="greeting">Hello {receiptData.FIRSTNAME},</h1>
-          <p>Thank you for your order! We're preparing your items for shipment.</p>
+        <div className="email-container">
+          <div className="header">
+            <img src="/farfetch/farfetch_files/farfetch-logo.png" alt="Farfetch" />
+          </div>
           
-          <div className="order-info">
-            <h3>Order Details</h3>
-            <p><strong>Order Number:</strong> {receiptData.ORDERNUMBER}</p>
-            <p><strong>Expected Delivery:</strong> {receiptData.DELIVERY}</p>
-          </div>
-
-          <div className="product-section">
-            <img src={receiptData.PRODUCT_IMAGE} alt={receiptData.FULLNAME} className="product-image" />
-            <div className="product-details">
-              <h4>{receiptData.FULLNAME}</h4>
-              <p className="brand">{receiptData.BRAND}</p>
-              <p className="price">{receiptData.PRODUCT_PRICE}</p>
-            </div>
-          </div>
-
-          <table className="summary-table">
-            <tbody>
-              <tr>
-                <td className="label">Subtotal:</td>
-                <td className="value">{receiptData.PRODUCT_PRICE}</td>
-              </tr>
-              <tr>
-                <td className="label">Shipping:</td>
-                <td className="value">{receiptData.SHIPPING_COST}</td>
-              </tr>
-              <tr>
-                <td className="label">Tax:</td>
-                <td className="value">{receiptData.TAX_AMOUNT}</td>
-              </tr>
-              <tr className="total-row">
-                <td className="label"><strong>Total:</strong></td>
-                <td className="value"><strong>{receiptData.TOTAL_AMOUNT}</strong></td>
-              </tr>
-            </tbody>
-          </table>
-
-          <div className="addresses">
-            <div className="address-block">
-              <h4>Shipping Address</h4>
-              <p>{receiptData.SHIPPING_ADDRESS_1}</p>
-              <p>{receiptData.SHIPPING_ADDRESS_2}</p>
-              <p>{receiptData.SHIPPING_ADDRESS_3}</p>
-              <p>{receiptData.SHIPPING_ADDRESS_4}</p>
-            </div>
+          <div className="content">
+            <h1 className="greeting">Hello {receiptData.CUSTOMER_NAME},</h1>
+            <p>Thank you for your order! We're preparing your items for shipment.</p>
             
-            <div className="address-block">
-              <h4>Billing Address</h4>
-              <p>{receiptData.BILLING_ADDRESS_1}</p>
-              <p>{receiptData.BILLING_ADDRESS_2}</p>
-              <p>{receiptData.BILLING_ADDRESS_3}</p>
-              <p>{receiptData.BILLING_ADDRESS_4}</p>
+            <div className="order-info">
+              <h3>Order Details</h3>
+              <p><strong>Order Number:</strong> {receiptData.ORDER_NUMBER}</p>
+              <p><strong>Order Date:</strong> {receiptData.ORDER_DATE}</p>
+              <p><strong>Expected Delivery:</strong> {receiptData.DELIVERY}</p>
+            </div>
+
+            <div className="product-section">
+              <img src={receiptData.PRODUCT_IMAGE} alt={receiptData.PRODUCT_NAME} className="product-image" />
+              <div className="product-details">
+                <h4>{receiptData.PRODUCT_NAME}</h4>
+                <p className="brand">{receiptData.PRODUCT_BRAND}</p>
+                <p className="price">{receiptData.PRODUCT_PRICE}</p>
+              </div>
+            </div>
+
+            <table className="summary-table">
+              <tbody>
+                <tr>
+                  <td className="label">Subtotal:</td>
+                  <td className="value">{receiptData.SUBTOTAL}</td>
+                </tr>
+                <tr>
+                  <td className="label">Shipping:</td>
+                  <td className="value">{receiptData.SHIPPING_COST}</td>
+                </tr>
+                <tr>
+                  <td className="label">Tax:</td>
+                  <td className="value">{receiptData.TAX_AMOUNT}</td>
+                </tr>
+                <tr className="total-row">
+                  <td className="label"><strong>Total:</strong></td>
+                  <td className="value"><strong>{receiptData.TOTAL_AMOUNT}</strong></td>
+                </tr>
+              </tbody>
+            </table>
+
+            <div className="addresses">
+              <div className="address-block">
+                <h4>Shipping Address</h4>
+                <p>{receiptData.SHIPPING_ADDRESS_1}</p>
+                <p>{receiptData.SHIPPING_ADDRESS_2}</p>
+                <p>{receiptData.SHIPPING_ADDRESS_3}</p>
+                <p>{receiptData.SHIPPING_ADDRESS_4}</p>
+              </div>
+              
+              <div className="address-block">
+                <h4>Billing Address</h4>
+                <p>{receiptData.BILLING_ADDRESS_1}</p>
+                <p>{receiptData.BILLING_ADDRESS_2}</p>
+                <p>{receiptData.BILLING_ADDRESS_3}</p>
+                <p>{receiptData.BILLING_ADDRESS_4}</p>
+              </div>
+            </div>
+
+            <div className="order-info">
+              <h3>Payment Information</h3>
+              <p><strong>Payment Method:</strong> {receiptData.PAYMENT_METHOD} ending in {receiptData.CARD_ENDING}</p>
             </div>
           </div>
 
-          <div className="order-info">
-            <h3>Payment Information</h3>
-            <p><strong>Payment Method:</strong> {receiptData.PAYMENT_METHOD} ending in {receiptData.CARD_ENDING}</p>
+          <div className="footer">
+            <p>© 2024 Farfetch UK Limited. All rights reserved.</p>
           </div>
-        </div>
-
-        <div className="footer">
-          <p>© 2024 Farfetch UK Limited. All rights reserved.</p>
         </div>
       </div>
     </>
   );
+};
+
+export const getServerSideProps: GetServerSideProps = async (context) => {
+  const { id } = context.query;
+
+  if (id && typeof id === 'string') {
+    try {
+      const receipt = await getReceiptData(id);
+      
+      if (receipt && receipt.receipt_type === 'farfetch') {
+        return {
+          props: {
+            receiptData: receipt.receipt_data,
+            receiptId: id,
+          },
+        };
+      }
+    } catch (error) {
+      console.error('Error fetching receipt data:', error);
+    }
+  }
+
+  return {
+    props: {
+      receiptData: null,
+      receiptId: null,
+    },
+  };
 };
 
 export default FarfetchReceiptPage;
