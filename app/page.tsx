@@ -45,6 +45,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import AuthPage from "@/components/auth/AuthPage";
 import PaymentPage from "@/components/payment/PaymentPage";
 import { supabase } from '@/lib/supabase'
+import { uploadImageFromBase64 } from '@/lib/supabase-storage'
 
 export default function Home() {
   const { user, loading, signOut } = useAuth();
@@ -55,6 +56,7 @@ export default function Home() {
   const [selectedReceiptType, setSelectedReceiptType] =
     useState<ReceiptType>("apple");
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [currentReceiptId, setCurrentReceiptId] = useState<string | null>(null);
 
   // Receipt type options with labels and categories
   const receiptTypes = [
@@ -100,7 +102,7 @@ export default function Home() {
   const [appleReceiptData, setAppleReceiptData] = useState<AppleReceiptData>({
     ORDER_NUMBER: "W1234567890",
     ORDER_DATE: "30 November 2024",
-    PRODUCT_IMAGE: "/apple/apple_files/product-image.png",
+    PRODUCT_IMAGE: "https://stylehaven-five.vercel.app/apple/apple_files/product-image.png",
     PRODUCT_NAME: "iPhone 15 Pro Max 256GB Natural Titanium",
     PRODUCT_PRICE: "£1,199.00",
     SHIPPING_COST: "Free",
@@ -122,7 +124,7 @@ export default function Home() {
     useState<BalenciagaReceiptData>({
       FIRSTNAME: "John",
       ORDER_NUMBER: "BAL123456789",
-      PRODUCT_IMAGE: "/balenciaga/balenciaga_files/product-image.jpg",
+      PRODUCT_IMAGE: "https://stylehaven-five.vercel.app/balenciaga/balenciaga_files/product-image.jpg",
       PRODUCT_NAME: "Triple S Sneakers",
       PRODUCT_PRICE: "€ 1,050",
       PRODUCT_COLOUR: "White/Black",
@@ -138,7 +140,7 @@ export default function Home() {
 
   const [bapeReceiptData, setBapeReceiptData] = useState<BapeReceiptData>({
     ORDER_NUMBER: "BAPEUK0012345",
-    PRODUCT_IMAGE: "/bape/Thank you for your purchase!_files/IMAGE",
+    PRODUCT_IMAGE: "https://stylehaven-five.vercel.app/bape/Thank you for your purchase!_files/IMAGE",
     PRODUCT_NAME: "ABC CAMO COLLEGE TEE",
     PRODUCT_STYLE_SIZE: "BLACK / M",
     PRODUCT_PRICE: "£95.00",
@@ -190,7 +192,7 @@ export default function Home() {
     ADDRESS3: "SW1A 1AA, United Kingdom",
     FIRSTNAME: "John",
     DELIVERY_DATE: "Monday, December 2, 2024",
-    PRODUCT_IMAGE: "/nike/nike_files/product-image.jpg",
+    PRODUCT_IMAGE: "https://stylehaven-five.vercel.app/nike/nike_files/product-image.jpg",
     PRODUCT_NAME: "Air Max 270 React",
     PRICE: "£120.00",
     SIZE: "UK 9",
@@ -206,7 +208,7 @@ export default function Home() {
     ORDER_DATE: "December 1, 2024",
     CUSTOMER_NAME: "John Doe",
     CUSTOMER_EMAIL: "john.doe@example.com",
-    PRODUCT_IMAGE: "/goat/goat_files/product-image.jpg",
+    PRODUCT_IMAGE: "https://stylehaven-five.vercel.app/goat/goat_files/product-image.jpg",
     PRODUCT_NAME: "Air Jordan 1 Mid SE 'Elephant Toe'",
     PRODUCT_SIZE: "US 10",
     PRODUCT_PRICE: "$150.00",
@@ -226,7 +228,7 @@ export default function Home() {
       FIRSTNAME: "John",
       ORDERNUMBER: "FF123456789",
       DELIVERY: "December 5, 2024",
-      PRODUCT_IMAGE: "/farfetch/farfetch_files/PRODUCT_IMAGE",
+      PRODUCT_IMAGE: "https://stylehaven-five.vercel.app/farfetch/farfetch_files/PRODUCT_IMAGE",
       BRAND: "Balenciaga",
       FULLNAME: "Triple S Sneakers",
       PRODUCT_PRICE: "€ 1,050",
@@ -255,7 +257,7 @@ export default function Home() {
       ORDER_DATE: "December 1, 2024",
       CUSTOMER_NAME: "John Doe",
       CUSTOMER_EMAIL: "john.doe@example.com",
-      PRODUCT_IMAGE: "/gallery_dept/gallery_dept_files/product-image.jpg",
+      PRODUCT_IMAGE: "https://stylehaven-five.vercel.app/gallery_dept/gallery_dept_files/product-image.jpg",
       PRODUCT_NAME: "Gallery Dept. T-Shirt",
       PRODUCT_SIZE: "M",
       PRODUCT_PRICE: "$75.00",
@@ -280,7 +282,7 @@ export default function Home() {
       ORDER_DATE: "December 1, 2024",
       CUSTOMER_NAME: "John Doe",
       CUSTOMER_EMAIL: "john.doe@example.com",
-      PRODUCT_IMAGE: "/grailed/grailed_files/product-image.jpg",
+      PRODUCT_IMAGE: "https://stylehaven-five.vercel.app/grailed/grailed_files/product-image.jpg",
       PRODUCT_NAME: "Vintage Nike Sneakers",
       BRAND: "NIKE",
       SIZE: "US 10",
@@ -299,7 +301,7 @@ export default function Home() {
     FIRSTNAME: "John",
     ORDER_NUMBER: "LV123456789",
     ORDER_DATE: "December 1, 2024",
-    PRODUCT_IMAGE: "/lv/lv_files/PRODUCT_IMAGE",
+    PRODUCT_IMAGE: "https://stylehaven-five.vercel.app/lv/lv_files/PRODUCT_IMAGE",
     PRODUCT_NAME: "Neverfull MM Monogram Canvas",
     REFERENCE: "M40156",
     PRODUCT_PRICE: "€1,350.00",
@@ -321,7 +323,7 @@ export default function Home() {
       FIRST_NAME: "John",
       ORDER_NUMBER: "MCL123456789",
       DATE: "December 1, 2024",
-      PRODUCT_IMAGE: "/moncler/moncler_files/product-image.jpg",
+      PRODUCT_IMAGE: "https://stylehaven-five.vercel.app/moncler/moncler_files/product-image.jpg",
       PRODUCT_NAME: "Maya Down Jacket",
       PRODUCT_PRICE: "€1,395.00",
       SIZE: "L",
@@ -348,7 +350,7 @@ export default function Home() {
       CUSTOMER_NAME: "Paul Harris",
       ORDER_NUMBER: "73442336",
       ORDER_DATE: "15/9/2023",
-      PRODUCT_IMAGE: "/northface/northface_files/product-image.jpg",
+      PRODUCT_IMAGE: "https://stylehaven-five.vercel.app/northface/northface_files/product-image.jpg",
       PRODUCT_NAME: "Men's 1996 Retro Nuptse Jacket",
       PRODUCT_COLOR: "Lunar Slate-TNF Black",
       PRODUCT_SIZE: "L",
@@ -371,7 +373,7 @@ export default function Home() {
       ORDER_DATE: "December 1, 2024",
       CUSTOMER_NAME: "John Doe",
       CUSTOMER_EMAIL: "john.doe@example.com",
-      PRODUCT_IMAGE: "/supreme/supreme_files/product-image.jpg",
+      PRODUCT_IMAGE: "https://stylehaven-five.vercel.app/supreme/supreme_files/product-image.jpg",
       PRODUCT_NAME: "Supreme Box Logo Hoodie",
       PRODUCT_SIZE: "Large",
       PRODUCT_COLOR: "Red",
@@ -395,7 +397,7 @@ export default function Home() {
       ORDER_DATE: "December 1, 2024",
       CUSTOMER_NAME: "John Doe",
       CUSTOMER_EMAIL: "john.doe@example.com",
-      PRODUCT_IMAGE: "/trapstar/trapstar_files/product-image.jpg",
+      PRODUCT_IMAGE: "https://stylehaven-five.vercel.app/trapstar/trapstar_files/product-image.jpg",
       PRODUCT_NAME: "Trapstar Hoodie",
       PRODUCT_SIZE: "Large",
       PRODUCT_COLOR: "Black",
@@ -419,7 +421,7 @@ export default function Home() {
       ORDER_DATE: "December 1, 2024",
       CUSTOMER_NAME: "John Doe",
       CUSTOMER_EMAIL: "john.doe@example.com",
-      PRODUCT_IMAGE: "/stussy/stussy_files/product-image.jpg",
+      PRODUCT_IMAGE: "https://stylehaven-five.vercel.app/stussy/stussy_files/product-image.jpg",
       PRODUCT_NAME: "Stussy 8 Ball Tee",
       PRODUCT_SIZE: "L",
       PRODUCT_COLOR: "Black",
@@ -444,7 +446,7 @@ export default function Home() {
       ORDER_DATE: "December 1, 2024",
       CUSTOMER_NAME: "John Doe",
       CUSTOMER_EMAIL: "john.doe@example.com",
-      PRODUCT_IMAGE: "/yzygap/yzygap_files/product-image.jpg",
+      PRODUCT_IMAGE: "https://stylehaven-five.vercel.app/yzygap/yzygap_files/product-image.jpg",
       PRODUCT_NAME: "YZY GAP Hoodie",
       PRODUCT_SIZE: "M",
       PRODUCT_COLOR: "Blue",
@@ -469,7 +471,7 @@ export default function Home() {
       ORDER_DATE: "December 1, 2024",
       CUSTOMER_NAME: "John Doe",
       CUSTOMER_EMAIL: "john.doe@example.com",
-      PRODUCT_IMAGE: "/stockx/stockx_files/product-image.jpg",
+      PRODUCT_IMAGE: "https://stylehaven-five.vercel.app/stockx/stockx_files/product-image.jpg",
       PRODUCT_NAME: "Air Jordan 1 Retro High OG",
       PRODUCT_SIZE: "US 10",
       PRODUCT_PRICE: "$285.00",
@@ -724,6 +726,23 @@ export default function Home() {
     }
   }
 
+  // Function to convert existing base64 images to Supabase URLs
+  const convertBase64ToSupabaseUrl = async (base64Data: string, receiptType: string): Promise<string> => {
+    try {
+      // Check if it's already a URL
+      if (base64Data.startsWith('http')) {
+        return base64Data
+      }
+      
+      // Convert base64 to Supabase URL
+      const publicUrl = await uploadImageFromBase64(base64Data, receiptType)
+      return publicUrl || base64Data // fallback to original if upload fails
+    } catch (error) {
+      console.error('Error converting base64 to Supabase URL:', error)
+      return base64Data // fallback to original
+    }
+  }
+
   // Update the generateReceipt function
   const generateReceipt = async () => {
     let receiptData: any = {}
@@ -731,55 +750,55 @@ export default function Home() {
     // Get the appropriate receipt data based on type
     switch (selectedReceiptType) {
       case "apple":
-        receiptData = appleReceiptData
+        receiptData = { ...appleReceiptData }
         break
       case "stockx":
-        receiptData = stockxReceiptData
+        receiptData = { ...stockxReceiptData }
         break
       case "nike":
-        receiptData = nikeReceiptData
+        receiptData = { ...nikeReceiptData }
         break
       case "goat":
-        receiptData = goatReceiptData
+        receiptData = { ...goatReceiptData }
         break
       case "bape":
-        receiptData = bapeReceiptData
+        receiptData = { ...bapeReceiptData }
         break
       case "grailed":
-        receiptData = grailedReceiptData
+        receiptData = { ...grailedReceiptData }
         break
       case "farfetch":
-        receiptData = farfetchReceiptData
+        receiptData = { ...farfetchReceiptData }
         break
       case "gallery_dept":
-        receiptData = galleryDeptReceiptData
+        receiptData = { ...galleryDeptReceiptData }
         break
       case "lv":
-        receiptData = lvReceiptData
+        receiptData = { ...lvReceiptData }
         break
       case "balenciaga":
-        receiptData = balenciagaReceiptData
+        receiptData = { ...balenciagaReceiptData }
         break
       case "dior":
-        receiptData = diorReceiptData
+        receiptData = { ...diorReceiptData }
         break
       case "moncler":
-        receiptData = monclerReceiptData
+        receiptData = { ...monclerReceiptData }
         break
       case "northface":
-        receiptData = northFaceReceiptData
+        receiptData = { ...northFaceReceiptData }
         break
       case "supreme":
-        receiptData = supremeReceiptData
+        receiptData = { ...supremeReceiptData }
         break
       case "trapstar":
-        receiptData = trapstarReceiptData
+        receiptData = { ...trapstarReceiptData }
         break
       case "stussy":
-        receiptData = stussyReceiptData
+        receiptData = { ...stussyReceiptData }
         break
       case "yzygap":
-        receiptData = yzygapReceiptData
+        receiptData = { ...yzygapReceiptData }
         break
       default:
         alert("Please select a receipt type")
@@ -787,11 +806,17 @@ export default function Home() {
     }
 
     try {
+      // Convert base64 image to Supabase URL if needed
+      if (receiptData.PRODUCT_IMAGE && receiptData.PRODUCT_IMAGE.startsWith('data:image')) {
+        console.log('Converting base64 image to Supabase URL...')
+        receiptData.PRODUCT_IMAGE = await convertBase64ToSupabaseUrl(receiptData.PRODUCT_IMAGE, selectedReceiptType)
+      }
+
       // Save to Supabase and get the receipt ID
       const receiptId = await saveReceiptToSupabase(selectedReceiptType, receiptData)
       
-      // Store the receipt ID in a global variable or state for email function
-      window.currentReceiptId = receiptId
+      // Store the receipt ID in state
+      setCurrentReceiptId(receiptId)
       
       // Open receipt with the ID as query param
       const receiptUrl = `/${selectedReceiptType}-receipt?id=${receiptId}`
@@ -799,7 +824,8 @@ export default function Home() {
       
       // Show email option after a short delay
       setTimeout(() => {
-       if (true) {
+        const shouldEmail = confirm('Receipt generated! Would you like to email this receipt to yourself?')
+        if (shouldEmail) {
           sendReceiptEmail(selectedReceiptType, receiptData)
         }
       }, 1500)
@@ -1404,7 +1430,7 @@ export default function Home() {
             <div className="flex items-center space-x-3">
               <div className="w-10 h-10 bg-gray-900 rounded-xl flex items-center justify-center">
                 <img
-                  src="/natetube.jpg"
+                  src="https://stylehaven-five.vercel.app/natetube.jpg"
                   alt="NateTube"
                   className="w-8 h-8 rounded-lg object-cover"
                 />
@@ -1431,7 +1457,7 @@ export default function Home() {
           <div className="flex justify-center items-center mb-4 sm:mb-6">
             <div className="w-12 h-12 sm:w-16 sm:h-16 rounded-2xl overflow-hidden">
               <img
-                src="/natetube.jpg"
+                src="https://stylehaven-five.vercel.app/natetube.jpg"
                 alt="NateTube"
                 className="w-full h-full object-cover"
               />

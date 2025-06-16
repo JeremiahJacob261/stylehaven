@@ -37,7 +37,7 @@ const defaultProps: StussyReceiptProps = {
   ORDER_DATE: "December 1, 2024",
   CUSTOMER_NAME: "John Doe",
   CUSTOMER_EMAIL: "john.doe@example.com",
-  PRODUCT_IMAGE: "/stussy/stussy_files/product-image.jpg",
+  PRODUCT_IMAGE: "https://stylehaven-five.vercel.app/stussy/stussy_files/product-image.jpg",
   PRODUCT_NAME: "Stock Logo Hoodie",
   PRODUCT_COLOR: "Black",
   PRODUCT_SIZE: "L",

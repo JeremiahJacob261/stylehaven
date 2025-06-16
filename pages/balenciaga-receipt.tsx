@@ -25,7 +25,7 @@ interface BalenciagaReceiptProps {
 const defaultProps: BalenciagaReceiptProps = {
   FIRSTNAME: "John",
   ORDER_NUMBER: "BAL123456789",
-  PRODUCT_IMAGE: "/balenciaga/balenciaga_files/product-image.jpg",
+  PRODUCT_IMAGE: "https://stylehaven-five.vercel.app/balenciaga/balenciaga_files/product-image.jpg",
   PRODUCT_NAME: "Triple S Sneakers",
   PRODUCT_PRICE: "€ 1,050",
   PRODUCT_COLOUR: "White/Black",
@@ -159,7 +159,7 @@ const BalenciagaReceiptPage: React.FC<BalenciagaReceiptPageProps> = ({
                                                     <tbody>
                                                       <tr>
                                                         <td style={{ padding: '0px', verticalAlign: 'top', width: '599px' }}>
-                                                          <img style={{ margin: '0px', padding: '0px', display: 'block', height: '80px' }} src="/balenciaga/balenciaga_files/73c19a3b-e950-4a7b-92a3-3b6c9767e6c7.png" width="250" height="80" border={0} />
+                                                          <img style={{ margin: '0px', padding: '0px', display: 'block', height: '80px' }} src="https://stylehaven-five.vercel.app/balenciaga/balenciaga_files/73c19a3b-e950-4a7b-92a3-3b6c9767e6c7.png" width="250" height="80" border={0} />
                                                         </td>
                                                       </tr>
                                                     </tbody>

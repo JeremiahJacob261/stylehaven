@@ -39,7 +39,7 @@ const defaultProps: FarfetchReceiptProps = {
   ORDER_DATE: "December 1, 2024",
   CUSTOMER_NAME: "John Doe",
   CUSTOMER_EMAIL: "john.doe@example.com",
-  PRODUCT_IMAGE: "/farfetch/farfetch_files/product-image.jpg",
+  PRODUCT_IMAGE: "https://stylehaven-five.vercel.app/farfetch/farfetch_files/product-image.jpg",
   PRODUCT_NAME: "Oversized Logo T-Shirt",
   PRODUCT_BRAND: "Off-White",
   PRODUCT_COLOR: "Black",
@@ -113,7 +113,7 @@ const FarfetchReceiptPage: React.FC<FarfetchReceiptPageProps> = ({
         
         <div className="email-container">
           <div className="header">
-            <img src="/farfetch/farfetch_files/farfetch-logo.png" alt="Farfetch" />
+            <img src="https://stylehaven-five.vercel.app/farfetch/farfetch_files/farfetch-logo.png" alt="Farfetch" />
           </div>
           
           <div className="content">

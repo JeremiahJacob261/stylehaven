@@ -27,7 +27,7 @@ interface BapeReceiptProps {
 
 const defaultProps: BapeReceiptProps = {
   ORDER_NUMBER: "BAPEUK0012345",
-  PRODUCT_IMAGE: "/bape/Thank you for your purchase!_files/IMAGE",
+  PRODUCT_IMAGE: "https://stylehaven-five.vercel.app/bape/Thank you for your purchase!_files/IMAGE",
   PRODUCT_NAME: "ABC CAMO COLLEGE TEE",
   PRODUCT_STYLE_SIZE: "BLACK / M",
   PRODUCT_PRICE: "£95.00",
@@ -403,7 +403,7 @@ const BapeReceiptPage: React.FC<BapeReceiptPageProps> = ({
                                       <tr>
                                         <td className="shop-name__cell">
                                           <img 
-                                            src="/bape/Thank you for your purchase!_files/ukbapecomlogo01.png" 
+                                            src="https://stylehaven-five.vercel.app/bape/Thank you for your purchase!_files/ukbapecomlogo01.png" 
                                             alt="uk.bape.com" 
                                             width="250" 
                                           />
@@ -650,7 +650,7 @@ const BapeReceiptPage: React.FC<BapeReceiptPageProps> = ({
                                           <h4>Payment</h4>
                                           <p className="customer-info__item-content">
                                             <img 
-                                              src="/bape/Thank you for your purchase!_files/mastercard-c8d6f1c2e7b63ab95f49954c724c675678d205478e3de8d6f3da384fc068589d.png" 
+                                              src="https://stylehaven-five.vercel.app/bape/Thank you for your purchase!_files/mastercard-c8d6f1c2e7b63ab95f49954c724c675678d205478e3de8d6f3da384fc068589d.png" 
                                               className="customer-info__item-credit" 
                                               height="24" 
                                               alt="Mastercard" 
@@ -703,7 +703,7 @@ const BapeReceiptPage: React.FC<BapeReceiptPageProps> = ({
                 </table>
 
                 <img 
-                  src="/bape/Thank you for your purchase!_files/spacer-1a26dfd5c56b21ac888f9f1610ef81191b571603cb207c6c0f564148473cab3c.png" 
+                  src="https://stylehaven-five.vercel.app/bape/Thank you for your purchase!_files/spacer-1a26dfd5c56b21ac888f9f1610ef81191b571603cb207c6c0f564148473cab3c.png" 
                   className="spacer" 
                   height="1" 
                 />

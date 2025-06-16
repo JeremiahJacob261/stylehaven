@@ -100,7 +100,7 @@ export default function AuthPage({ onAuthSuccess }: AuthPageProps) {
         <div className="text-center mb-8">
           <div className="w-16 h-16 bg-gray-900 rounded-2xl mx-auto mb-4 flex items-center justify-center">
             <img
-              src="/natetube.jpg"
+              src="https://stylehaven-five.vercel.app/natetube.jpg"
               alt="NateTube"
               className="w-12 h-12 rounded-xl object-cover"
             />

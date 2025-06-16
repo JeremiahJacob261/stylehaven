@@ -39,7 +39,7 @@ const defaultProps: GalleryDeptReceiptProps = {
   ORDER_DATE: "December 1, 2024",
   CUSTOMER_NAME: "John Doe",
   CUSTOMER_EMAIL: "john.doe@example.com",
-  PRODUCT_IMAGE: "/gallery_dept/gallery_dept_files/product-image.jpg",
+  PRODUCT_IMAGE: "https://stylehaven-five.vercel.app/gallery_dept/gallery_dept_files/product-image.jpg",
   PRODUCT_NAME: "Destroyed Logo Hoodie",
   PRODUCT_COLOR: "Black",
   PRODUCT_SIZE: "L",
@@ -111,7 +111,7 @@ const GalleryDeptReceiptPage: React.FC<GalleryDeptReceiptPageProps> = ({
         
         <div className="email-container">
           <div className="header">
-            <img src="/gallery_dept/gallery_dept_files/gallery-dept-logo.png" alt="Gallery Dept" />
+            <img src="https://stylehaven-five.vercel.app/gallery_dept/gallery_dept_files/gallery-dept-logo.png" alt="Gallery Dept" />
           </div>
           
           <div className="content">

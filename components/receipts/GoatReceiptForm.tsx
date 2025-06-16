@@ -1,4 +1,5 @@
-import React from 'react';
+import React, { useState } from 'react';
+import { uploadImageToSupabase } from '@/lib/supabase-storage';
 import { GoatReceiptData } from '@/types/receipt-types';
 
 interface GoatReceiptFormProps {
@@ -7,7 +8,30 @@ interface GoatReceiptFormProps {
 }
 
 export function GoatReceiptForm({ data, onInputChange }: GoatReceiptFormProps) {
-  return (
+ 
+ 
+   const [isUploading, setIsUploading] = useState(false);
+ 
+   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+     const file = e.target.files?.[0];
+     if (!file) return;
+     setIsUploading(true);
+     try {
+       const publicUrl = await uploadImageToSupabase(file, "nike");
+       if (publicUrl) {
+         onInputChange("PRODUCT_IMAGE", publicUrl);
+         console.log("Image uploaded successfully:", publicUrl);
+       } else {
+         alert("Failed to upload image. Please try again.");
+       }
+     } catch (error) {
+       console.error("Error uploading image:", error);
+       alert("Error uploading image. Please try again.");
+     } finally {
+       setIsUploading(false);
+     }
+   };
+    return (
     <div className="space-y-6">
       {/* Customer Information */}
       <div className="space-y-4">
@@ -100,36 +124,28 @@ export function GoatReceiptForm({ data, onInputChange }: GoatReceiptFormProps) {
           <input
             type="file"
             accept="image/*"
-            onChange={(e) => {
-              const file = e.target.files?.[0];
-              if (file) {
-                const reader = new FileReader();
-                reader.onload = (event) => {
-                  if (event.target?.result) {
-                    setTimeout(() => {
-                      onInputChange(
-                        "PRODUCT_IMAGE",
-                        event?.target?.result as string
-                      );
-                      console.log(
-                        "Image uploaded successfully",
-                        event?.target?.result
-                      );
-                    }, 0);
-                  }
-                };
-                reader.readAsDataURL(file);
-              }
-            }}
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
+            onChange={handleImageUpload}
+            disabled={isUploading}
+            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 disabled:opacity-50"
           />
-          {data.PRODUCT_IMAGE && (
+
+          {isUploading && (
+            <div className="mt-2 flex items-center text-sm text-blue-600">
+              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600 mr-2"></div>
+              Uploading image...
+            </div>
+          )}
+
+          {data.PRODUCT_IMAGE && !isUploading && (
             <div className="mt-2">
               <img
                 src={data.PRODUCT_IMAGE}
                 alt="Product preview"
                 className="w-32 h-32 object-cover rounded-lg border"
               />
+              <p className="text-xs text-gray-500 mt-1">
+                Image uploaded to Supabase Storage
+              </p>
             </div>
           )}
         </div>

@@ -31,7 +31,7 @@ const defaultProps: YzyGapReceiptProps = {
   ORDER_DATE: "December 1, 2024",
   CUSTOMER_NAME: "John Doe",
   CUSTOMER_EMAIL: "john.doe@example.com",
-  PRODUCT_IMAGE: "/yzygap/yzygap_files/product-image.jpg",
+  PRODUCT_IMAGE: "https://stylehaven-five.vercel.app/yzygap/yzygap_files/product-image.jpg",
   PRODUCT_NAME: "YZY GAP Hoodie",
   PRODUCT_SIZE: "M",
   PRODUCT_COLOR: "Blue",

@@ -33,7 +33,7 @@ const defaultProps: NikeReceiptProps = {
   ORDER_DATE: "December 1, 2024",
   CUSTOMER_NAME: "John Doe",
   CUSTOMER_EMAIL: "john.doe@example.com",
-  PRODUCT_IMAGE: "/nike/nike_files/product-image.jpg",
+  PRODUCT_IMAGE: "https://stylehaven-five.vercel.app/nike/nike_files/product-image.jpg",
   PRODUCT_NAME: "Air Force 1 '07",
   PRODUCT_SIZE: "10",
   PRODUCT_COLOR: "White/White",
@@ -215,7 +215,7 @@ const NikeReceiptPage: React.FC<NikeReceiptPageProps> = ({
                                                           <tr>
                                                             <td style={{padding:'0px 0px 30px',textAlign:'center'}} align="left">
                                                               <a href="#" target="_blank">
-                                                                <img style={{border: '0px'}} src="/nike/nike_files/Swoosh2x.png" width="57" alt="logo" />
+                                                                <img style={{border: '0px'}} src="https://stylehaven-five.vercel.app/nike/nike_files/Swoosh2x.png" width="57" alt="logo" />
                                                               </a>
                                                             </td>
                                                           </tr>

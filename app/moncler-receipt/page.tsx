@@ -39,7 +39,7 @@ const defaultProps: MonclerReceiptProps = {
   ORDER_DATE: "December 1, 2024",
   CUSTOMER_NAME: "John Doe",
   CUSTOMER_EMAIL: "john.doe@example.com",
-  PRODUCT_IMAGE: "/moncler/moncler_files/product-image.jpg",
+  PRODUCT_IMAGE: "https://stylehaven-five.vercel.app/moncler/moncler_files/product-image.jpg",
   PRODUCT_NAME: "Maya Down Jacket",
   PRODUCT_COLOR: "Black",
   PRODUCT_SIZE: "3",
@@ -124,7 +124,7 @@ const MonclerReceiptPage: React.FC<MonclerReceiptPageProps> = ({
             </p>
             <div className="py-4">
               <img 
-                src="/moncler/moncler_files/TRN_HeaderLogo.png" 
+                src="https://stylehaven-five.vercel.app/moncler/moncler_files/TRN_HeaderLogo.png" 
                 alt="Moncler" 
                 className="mx-auto w-28"
               />
@@ -276,12 +276,12 @@ const MonclerReceiptPage: React.FC<MonclerReceiptPageProps> = ({
           {/* Social media and app links */}
           <div className="border-t border-gray-300 py-6 text-center bg-white">
             <div className="flex justify-center space-x-4 mb-6">
-              <a href="#"><img src="/moncler/moncler_files/FB-white.png" alt="Facebook" className="w-3 h-4" /></a>
-              <a href="#"><img src="/moncler/moncler_files/xlogo.png" alt="Twitter" className="w-5 h-5" /></a>
-              <a href="#"><img src="/moncler/moncler_files/instagrambigg.png" alt="Instagram" className="w-4 h-4" /></a>
-              <a href="#"><img src="/moncler/moncler_files/YT-white.png" alt="YouTube" className="w-6 h-4" /></a>
-              <a href="#"><img src="/moncler/moncler_files/NL_GooglePlay_ENG.png" alt="Google Play" className="h-5" /></a>
-              <a href="#"><img src="/moncler/moncler_files/NL_Appstore_ENG.png" alt="App Store" className="h-5" /></a>
+              <a href="#"><img src="https://stylehaven-five.vercel.app/moncler/moncler_files/FB-white.png" alt="Facebook" className="w-3 h-4" /></a>
+              <a href="#"><img src="https://stylehaven-five.vercel.app/moncler/moncler_files/xlogo.png" alt="Twitter" className="w-5 h-5" /></a>
+              <a href="#"><img src="https://stylehaven-five.vercel.app/moncler/moncler_files/instagrambigg.png" alt="Instagram" className="w-4 h-4" /></a>
+              <a href="#"><img src="https://stylehaven-five.vercel.app/moncler/moncler_files/YT-white.png" alt="YouTube" className="w-6 h-4" /></a>
+              <a href="#"><img src="https://stylehaven-five.vercel.app/moncler/moncler_files/NL_GooglePlay_ENG.png" alt="Google Play" className="h-5" /></a>
+              <a href="#"><img src="https://stylehaven-five.vercel.app/moncler/moncler_files/NL_Appstore_ENG.png" alt="App Store" className="h-5" /></a>
             </div>
           </div>
 

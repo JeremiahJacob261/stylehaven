@@ -33,7 +33,7 @@ const defaultProps: StockXReceiptProps = {
   ORDER_DATE: "December 1, 2024",
   CUSTOMER_NAME: "John Doe",
   CUSTOMER_EMAIL: "john.doe@example.com",
-  PRODUCT_IMAGE: "/stockx/stockx_files/product-image.jpg",
+  PRODUCT_IMAGE: "https://stylehaven-five.vercel.app/stockx/stockx_files/product-image.jpg",
   PRODUCT_NAME: "Air Jordan 1 Retro High OG",
   PRODUCT_SIZE: "US 10",
   PRODUCT_PRICE: "$285.00",

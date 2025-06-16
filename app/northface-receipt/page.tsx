@@ -38,7 +38,7 @@ const defaultProps: NorthFaceReceiptProps = {
   ORDER_DATE: "December 1, 2024",
   CUSTOMER_NAME: "John Doe",
   CUSTOMER_EMAIL: "john.doe@example.com",
-  PRODUCT_IMAGE: "/northface/northface_files/product-image.jpg",
+  PRODUCT_IMAGE: "https://stylehaven-five.vercel.app/northface/northface_files/product-image.jpg",
   PRODUCT_NAME: "1996 Retro Nuptse Jacket",
   PRODUCT_COLOR: "TNF Black",
   PRODUCT_SIZE: "L",
@@ -127,7 +127,7 @@ const NorthFaceReceiptPage: React.FC<NorthFaceReceiptPageProps> = ({
           {/* Header */}
           <div className="text-center py-5">
             <img 
-              src="/northface/northface_files/0ec5ac62-677e-40f8-9b7d-5c501058bf9c.jpg" 
+              src="https://stylehaven-five.vercel.app/northface/northface_files/0ec5ac62-677e-40f8-9b7d-5c501058bf9c.jpg" 
               alt="The North Face" 
               className="mx-auto h-12 w-auto"
             />
@@ -257,10 +257,10 @@ const NorthFaceReceiptPage: React.FC<NorthFaceReceiptPageProps> = ({
               <div className="border-t border-b border-gray-300 py-8 mb-8">
                 <div className="grid grid-cols-3 gap-4 items-center">
                   <div className="text-center">
-                    <img src="/northface/northface_files/a6616b56-96b2-493b-9df9-9d00a83d5014.jpg" alt="Support" className="mx-auto mb-2" />
+                    <img src="https://stylehaven-five.vercel.app/northface/northface_files/a6616b56-96b2-493b-9df9-9d00a83d5014.jpg" alt="Support" className="mx-auto mb-2" />
                   </div>
                   <div className="text-center">
-                    <img src="/northface/northface_files/1035c32e-04e3-442d-8c41-a7bc5e7836b8.jpg" alt="Contact" className="mx-auto mb-2" />
+                    <img src="https://stylehaven-five.vercel.app/northface/northface_files/1035c32e-04e3-442d-8c41-a7bc5e7836b8.jpg" alt="Contact" className="mx-auto mb-2" />
                   </div>
                   <div>
                     <p className="text-base font-bold uppercase mb-2">Got a question?</p>

@@ -28,7 +28,7 @@ const defaultProps: LVReceiptProps = {
   FIRSTNAME: "John",
   ORDER_NUMBER: "LV123456789",
   ORDER_DATE: "December 1, 2024",
-  PRODUCT_IMAGE: "/lv/lv_files/PRODUCT_IMAGE",
+  PRODUCT_IMAGE: "https://stylehaven-five.vercel.app/lv/lv_files/PRODUCT_IMAGE",
   PRODUCT_NAME: "Neverfull MM Monogram Canvas",
   REFERENCE: "M40156",
   PRODUCT_PRICE: "€1,350.00",
@@ -346,7 +346,7 @@ const LVReceiptPage: React.FC<LVReceiptPageProps> = ({
 
       <div className="email-container">
         <div className="header">
-          <img src="/lv/lv_files/lv_logo.png" alt="Louis Vuitton" />
+          <img src="https://stylehaven-five.vercel.app/lv/lv_files/lv_logo.png" alt="Louis Vuitton" />
         </div>
         
         <div className="content">

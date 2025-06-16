@@ -37,7 +37,7 @@ const defaultProps: TrapstarReceiptProps = {
   ORDER_DATE: "December 1, 2024",
   CUSTOMER_NAME: "John Doe",
   CUSTOMER_EMAIL: "john.doe@example.com",
-  PRODUCT_IMAGE: "/trapstar/trapstar_files/product-image.jpg",
+  PRODUCT_IMAGE: "https://stylehaven-five.vercel.app/trapstar/trapstar_files/product-image.jpg",
   PRODUCT_NAME: "Irongate T-Shirt",
   PRODUCT_COLOR: "Black",
   PRODUCT_SIZE: "L",

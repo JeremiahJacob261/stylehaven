@@ -28,7 +28,7 @@ const defaultProps: GoatReceiptProps = {
   ORDER_DATE: "December 1, 2024",
   CUSTOMER_NAME: "John Doe",
   CUSTOMER_EMAIL: "john.doe@example.com",
-  PRODUCT_IMAGE: "/goat/goat_files/product-image.jpg",
+  PRODUCT_IMAGE: "https://stylehaven-five.vercel.app/goat/goat_files/product-image.jpg",
   PRODUCT_NAME: "Air Jordan 1 Mid SE 'Elephant Toe'",
   PRODUCT_SIZE: "US 10",
   PRODUCT_PRICE: "$150.00",
@@ -93,7 +93,7 @@ const GoatReceiptPage: React.FC<GoatReceiptPageProps> = ({
                         <tbody>
                           <tr>
                             <td align="left" width="50%" style={{paddingLeft: '40px', fontFamily: 'Helvetica, Arial, sans-serif', letterSpacing: '3px', fontSize: '50px'}}>
-                              <img src="/goat/goat_files/GOATLogo2022.png" width="120" height="27" border={0} style={{maxWidth: '120px', color: '#000000', display: 'block'}} alt="GOAT" />
+                              <img src="https://stylehaven-five.vercel.app/goat/goat_files/GOATLogo2022.png" width="120" height="27" border={0} style={{maxWidth: '120px', color: '#000000', display: 'block'}} alt="GOAT" />
                             </td>
                             <td align="right" width="50%" style={{paddingRight: '40px'}}>
                               <a href="#" style={{fontFamily: 'Helvetica Neue, Helvetica, Arial, sans-serif', letterSpacing: '2.3px', fontSize: '10px', lineHeight: '24px', fontWeight: '500', textTransform: 'uppercase', textDecoration: 'underline', color: '#000000'}}>

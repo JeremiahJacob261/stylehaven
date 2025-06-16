@@ -266,7 +266,7 @@ const DiorReceiptPage: React.FC<DiorReceiptPageProps> = ({
 
       <div className="email-container">
         <div className="header">
-          <img src="/dior/dior_files/dior-logo.png" alt="DIOR" />
+          <img src="https://stylehaven-five.vercel.app/dior/dior_files/dior-logo.png" alt="DIOR" />
         </div>
         
         <div className="content">

@@ -29,7 +29,7 @@ interface AppleReceiptProps {
 const defaultProps: AppleReceiptProps = {
   ORDER_NUMBER: "W1234567890",
   ORDER_DATE: "30 November 2024",
-  PRODUCT_IMAGE: "/apple/apple_files/product-image.png",
+  PRODUCT_IMAGE: "https://stylehaven-five.vercel.app/apple/apple_files/product-image.png",
   PRODUCT_NAME: "iPhone 15 Pro Max 256GB Natural Titanium",
   PRODUCT_PRICE: "£1,199.00",
   SHIPPING_COST: "Free",
@@ -106,7 +106,7 @@ const AppleReceiptPage: React.FC<AppleReceiptPageProps> = ({
                             border={0} 
                             style={{ outline: 'none', display: 'block' }} 
                             className="header-logo-img" 
-                            src="/apple/apple_files/apple_icon_2x.png"
+                            src="https://stylehaven-five.vercel.app/apple/apple_files/apple_icon_2x.png"
                           />
                         </td>
                       </tr>
@@ -283,7 +283,7 @@ const AppleReceiptPage: React.FC<AppleReceiptPageProps> = ({
                                                     <tbody>
                                                       <tr>
                                                         <td style={{ height: '21px', fontSize: '21px', lineHeight: '21px', minWidth: '100%' }} align="left" height="21" valign="top" className="gap-30">
-                                                          <img width="1" height="21" border={0} style={{ display: 'block', outline: 'none' }} alt="" className="gap-30" src="/apple_files/spacer.gif" />
+                                                          <img width="1" height="21" border={0} style={{ display: 'block', outline: 'none' }} alt="" className="gap-30" src="https://stylehaven-five.vercel.app/apple_files/spacer.gif" />
                                                         </td>
                                                       </tr>
                                                       <tr>
@@ -293,7 +293,7 @@ const AppleReceiptPage: React.FC<AppleReceiptPageProps> = ({
                                                       </tr>
                                                       <tr>
                                                         <td style={{ height: '28px', fontSize: '28px', lineHeight: '28px', minWidth: '100%' }} align="left" height="28" valign="top" className="gap-24">
-                                                          <img width="1" height="28" border={0} style={{ display: 'block', outline: 'none' }} alt="" className="gap-24" src="/apple_files/spacer.gif" />
+                                                          <img width="1" height="28" border={0} style={{ display: 'block', outline: 'none' }} alt="" className="gap-24" src="https://stylehaven-five.vercel.app/apple_files/spacer.gif" />
                                                         </td>
                                                       </tr>
                                                     </tbody>
@@ -422,7 +422,7 @@ const AppleReceiptPage: React.FC<AppleReceiptPageProps> = ({
                                             <tbody>
                                               <tr>
                                                 <td style={{ height: '30px', fontSize: '30px', lineHeight: '30px', minWidth: '100%' }} align="left" height="30" valign="top" className="gap-21">
-                                                  <img width="1" height="30" border={0} style={{ display: 'block', outline: 'none' }} alt="" className="gap-21" src="/apple_files/spacer.gif" />
+                                                  <img width="1" height="30" border={0} style={{ display: 'block', outline: 'none' }} alt="" className="gap-21" src="https://stylehaven-five.vercel.app/apple_files/spacer.gif" />
                                                 </td>
                                               </tr>
                                               <tr>
@@ -432,7 +432,7 @@ const AppleReceiptPage: React.FC<AppleReceiptPageProps> = ({
                                               </tr>
                                               <tr>
                                                 <td style={{ height: '30px', fontSize: '30px', lineHeight: '30px', minWidth: '100%' }} align="left" height="30" valign="top" className="gap-32">
-                                                  <img width="1" height="30" border={0} style={{ display: 'block', outline: 'none' }} alt="" className="gap-32" src="/apple_files/spacer.gif" />
+                                                  <img width="1" height="30" border={0} style={{ display: 'block', outline: 'none' }} alt="" className="gap-32" src="https://stylehaven-five.vercel.app/apple_files/spacer.gif" />
                                                 </td>
                                               </tr>
                                             </tbody>
@@ -498,7 +498,7 @@ const AppleReceiptPage: React.FC<AppleReceiptPageProps> = ({
                             <tbody>
                               <tr>
                                 <td style={{ height: '41px', fontSize: '41px', lineHeight: '41px', minWidth: '100%' }} align="left" height="41" valign="top" className="gap-40">
-                                  <img width="1" height="41" border={0} style={{ display: 'block', outline: 'none' }} alt="" className="gap-40" src="/apple_files/spacer.gif" />
+                                  <img width="1" height="41" border={0} style={{ display: 'block', outline: 'none' }} alt="" className="gap-40" src="https://stylehaven-five.vercel.app/apple_files/spacer.gif" />
                                 </td>
                               </tr>
                               <tr>
@@ -508,7 +508,7 @@ const AppleReceiptPage: React.FC<AppleReceiptPageProps> = ({
                               </tr>
                               <tr>
                                 <td style={{ height: '1px', fontSize: '1px', lineHeight: '1px', minWidth: '100%' }} align="left" height="1" valign="top" className="gap-1">
-                                  <img width="1" height="1" border={0} style={{ display: 'block', outline: 'none' }} alt="" className="gap-1" src="/apple_files/spacer.gif" />
+                                  <img width="1" height="1" border={0} style={{ display: 'block', outline: 'none' }} alt="" className="gap-1" src="https://stylehaven-five.vercel.app/apple_files/spacer.gif" />
                                 </td>
                               </tr>
                             </tbody>
@@ -625,7 +625,7 @@ const AppleReceiptPage: React.FC<AppleReceiptPageProps> = ({
                                     <tbody>
                                       <tr>
                                         <td style={{ height: '1px', fontSize: '1px', lineHeight: '1px', minWidth: '100%' }} align="left" height="1" valign="top" className="gap-1">
-                                          <img width="1" height="1" border={0} style={{ display: 'block', outline: 'none' }} alt="" className="gap-1" src="/apple_files/spacer.gif" />
+                                          <img width="1" height="1" border={0} style={{ display: 'block', outline: 'none' }} alt="" className="gap-1" src="https://stylehaven-five.vercel.app/apple_files/spacer.gif" />
                                         </td>
                                       </tr>
                                       <tr>
@@ -635,7 +635,7 @@ const AppleReceiptPage: React.FC<AppleReceiptPageProps> = ({
                                       </tr>
                                       <tr>
                                         <td style={{ height: '18px', fontSize: '18px', lineHeight: '18px', minWidth: '100%' }} align="left" height="18" valign="top" className="gap-15">
-                                          <img width="1" height="18" border={0} style={{ display: 'block', outline: 'none' }} alt="" className="gap-15" src="/apple_files/spacer.gif" />
+                                          <img width="1" height="18" border={0} style={{ display: 'block', outline: 'none' }} alt="" className="gap-15" src="https://stylehaven-five.vercel.app/apple_files/spacer.gif" />
                                         </td>
                                       </tr>
                                     </tbody>
