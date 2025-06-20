@@ -35,7 +35,7 @@ export async function POST(request: NextRequest) {
       order_id: orderId,
       order_description: `NateTube ${plan === 'monthly' ? 'Monthly' : 'Lifetime'} Plan`,
       ipn_callback_url: `${process.env.NEXT_PUBLIC_BASE_URL}/api/crypto/webhook`,
-      success_url: `${process.env.NEXT_PUBLIC_BASE_URL}/dashboard`,
+      success_url: `${process.env.NEXT_PUBLIC_BASE_URL}/`,
       cancel_url: `${process.env.NEXT_PUBLIC_BASE_URL}/payment`
     })
     

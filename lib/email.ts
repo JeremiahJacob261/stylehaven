@@ -51,8 +51,8 @@ export class EmailService {
     userId: string
   ): Promise<{ success: boolean; error?: string }> {
     try {
-      const dashboardUrl = `${process.env.NEXT_PUBLIC_BASE_URL}/dashboard`
-      const supportEmail = process.env.SMTP_FROM
+      const dashboardUrl = `${process.env.NEXT_PUBLIC_BASE_URL}/`
+      const supportEmail = "super@natetube.com"
       
       const mailOptions = {
         from: process.env.SMTP_FROM,
@@ -71,7 +71,7 @@ export class EmailService {
               
               <!-- Header with Gradient -->
               <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 40px 30px; text-align: center; border-radius: 0;">
-                <div style="background: rgba(255,255,255,0.1); width: 80px; height: 80px; border-radius: 50%; margin: 0 auto 20px; display: flex; align-items: center; justify-content: center; backdrop-filter: blur(10px);">
+                <div style="width: 80px; height: 80px; border-radius: 50%; margin: 0 auto 20px; display: flex; align-items: center; justify-content: center;">
                   <span style="font-size: 32px; color: white;">👑</span>
                 </div>
                 <h1 style="color: white; margin: 0; font-size: 32px; font-weight: 700; letter-spacing: -0.5px;">Welcome to NateTube!</h1>
