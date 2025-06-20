@@ -128,14 +128,38 @@ export class AuthService {
       // Create session
       const sessionToken = await this.createSession(user.id)
 
+      // Send welcome email
+      try {
+        await fetch('/api/send-welcome-email', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            userEmail: user.email,
+            userName: user.username || user.email.split('@')[0],
+            userId: user.id
+          })
+        })
+      } catch (error) {
+        console.error('Failed to send welcome email:', error)
+        // Don't fail the signup if email fails
+      }
+
       return {
         success: true,
         user: user as unknown as User,
         token: sessionToken
       }
+
+
+      
     } catch (error: any) {
       return { success: false, error: error.message }
     }
+    //send welcome email
+
+  
   }
 
   static async login(email: string, password: string): Promise<AuthResult> {

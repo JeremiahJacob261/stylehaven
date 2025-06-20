@@ -44,6 +44,196 @@ export class EmailService {
     }
   }
 
+  // Beautiful Welcome Email for New Users
+  static async sendWelcomeEmail(
+    userEmail: string,
+    userName: string,
+    userId: string
+  ): Promise<{ success: boolean; error?: string }> {
+    try {
+      const dashboardUrl = `${process.env.NEXT_PUBLIC_BASE_URL}/dashboard`
+      const supportEmail = process.env.SMTP_FROM
+      
+      const mailOptions = {
+        from: process.env.SMTP_FROM,
+        to: userEmail,
+        subject: '🎉 Welcome to StyleHaven - Your Receipt Generation Journey Starts Here!',
+        html: `
+          <!DOCTYPE html>
+          <html lang="en">
+          <head>
+            <meta charset="UTF-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <title>Welcome to StyleHaven</title>
+          </head>
+          <body style="margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; background-color: #f8fafc;">
+            <div style="max-width: 600px; margin: 0 auto; background-color: #ffffff;">
+              
+              <!-- Header with Gradient -->
+              <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 40px 30px; text-align: center; border-radius: 0;">
+                <div style="background: rgba(255,255,255,0.1); width: 80px; height: 80px; border-radius: 50%; margin: 0 auto 20px; display: flex; align-items: center; justify-content: center; backdrop-filter: blur(10px);">
+                  <span style="font-size: 32px; color: white;">👑</span>
+                </div>
+                <h1 style="color: white; margin: 0; font-size: 32px; font-weight: 700; letter-spacing: -0.5px;">Welcome to StyleHaven!</h1>
+                <p style="color: rgba(255,255,255,0.9); margin: 10px 0 0 0; font-size: 18px; font-weight: 400;">Your professional receipt generation platform</p>
+              </div>
+
+              <!-- Welcome Message -->
+              <div style="padding: 40px 30px;">
+                <h2 style="color: #1a202c; margin: 0 0 20px 0; font-size: 24px; font-weight: 600;">
+                  Hello ${userName}! 🎊
+                </h2>
+                
+                <p style="color: #4a5568; line-height: 1.6; font-size: 16px; margin: 0 0 25px 0;">
+                  We're absolutely thrilled to have you join the StyleHaven community! Your account has been successfully created, and you're now ready to generate professional receipts that look authentic and polished.
+                </p>
+
+                <!-- Features Grid -->
+                <div style="background: #f7fafc; padding: 30px; border-radius: 12px; margin: 25px 0; border-left: 4px solid #667eea;">
+                  <h3 style="color: #2d3748; margin: 0 0 20px 0; font-size: 20px; font-weight: 600;">
+                    🚀 What you can do with StyleHaven:
+                  </h3>
+                  
+                  <div style="margin-bottom: 15px;">
+                    <div style="display: flex; align-items: flex-start; margin-bottom: 12px;">
+                      <span style="background: #667eea; color: white; width: 24px; height: 24px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-size: 12px; font-weight: bold; margin-right: 12px; flex-shrink: 0;">✓</span>
+                      <span style="color: #4a5568; font-size: 15px; line-height: 1.5;"><strong>Generate Premium Receipts</strong> - Access to all brand templates including Apple, Nike, Bape, and more</span>
+                    </div>
+                    
+                    <div style="display: flex; align-items: flex-start; margin-bottom: 12px;">
+                      <span style="background: #667eea; color: white; width: 24px; height: 24px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-size: 12px; font-weight: bold; margin-right: 12px; flex-shrink: 0;">✓</span>
+                      <span style="color: #4a5568; font-size: 15px; line-height: 1.5;"><strong>Professional Templates</strong> - Pixel-perfect designs that look authentic</span>
+                    </div>
+                    
+                    <div style="display: flex; align-items: flex-start; margin-bottom: 12px;">
+                      <span style="background: #667eea; color: white; width: 24px; height: 24px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-size: 12px; font-weight: bold; margin-right: 12px; flex-shrink: 0;">✓</span>
+                      <span style="color: #4a5568; font-size: 15px; line-height: 1.5;"><strong>Easy Customization</strong> - Personalize with your details in seconds</span>
+                    </div>
+                    
+                    <div style="display: flex; align-items: flex-start; margin-bottom: 12px;">
+                      <span style="background: #667eea; color: white; width: 24px; height: 24px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-size: 12px; font-weight: bold; margin-right: 12px; flex-shrink: 0;">✓</span>
+                      <span style="color: #4a5568; font-size: 15px; line-height: 1.5;"><strong>Instant Email Delivery</strong> - Get your receipts delivered straight to your inbox</span>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Getting Started -->
+                <div style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); padding: 25px; border-radius: 12px; margin: 25px 0; text-align: center;">
+                  <h3 style="color: white; margin: 0 0 15px 0; font-size: 20px; font-weight: 600;">
+                    🎯 Ready to Get Started?
+                  </h3>
+                  <p style="color: rgba(255,255,255,0.9); margin: 0 0 20px 0; font-size: 15px; line-height: 1.5;">
+                    Access your dashboard and create your first professional receipt in minutes!
+                  </p>
+                  
+                  <a href="${dashboardUrl}" style="background: white; color: #f5576c; padding: 14px 30px; border-radius: 8px; text-decoration: none; font-weight: 600; font-size: 16px; display: inline-block; box-shadow: 0 4px 15px rgba(0,0,0,0.1); transition: all 0.3s ease;">
+                    🚀 Go to Dashboard
+                  </a>
+                </div>
+
+                <!-- Next Steps -->
+                <div style="border: 2px dashed #e2e8f0; padding: 25px; border-radius: 12px; margin: 25px 0;">
+                  <h3 style="color: #2d3748; margin: 0 0 15px 0; font-size: 18px; font-weight: 600;">
+                    📋 Your Next Steps:
+                  </h3>
+                  
+                  <ol style="color: #4a5568; padding-left: 20px; margin: 0; line-height: 1.8;">
+                    <li style="margin-bottom: 8px;">Choose your subscription plan (Lifetime or Monthly)</li>
+                    <li style="margin-bottom: 8px;">Browse our collection of premium receipt templates</li>
+                    <li style="margin-bottom: 8px;">Customize your first receipt with your details</li>
+                    <li style="margin-bottom: 8px;">Download or email your professional receipt</li>
+                  </ol>
+                </div>
+
+                <!-- Pricing Reminder -->
+                <div style="background: #fff5f5; border: 1px solid #fed7d7; padding: 20px; border-radius: 12px; margin: 25px 0;">
+                  <h3 style="color: #c53030; margin: 0 0 10px 0; font-size: 16px; font-weight: 600;">
+                    💳 Special Pricing
+                  </h3>
+                  <p style="color: #742a2a; margin: 0; font-size: 14px; line-height: 1.5;">
+                    <strong>Lifetime Access:</strong> $25 one-time payment<br>
+                    <strong>Monthly Plan:</strong> $5/month (cancel anytime)
+                  </p>
+                </div>
+
+                <!-- Support Section -->
+                <div style="text-align: center; margin: 30px 0;">
+                  <h3 style="color: #2d3748; margin: 0 0 15px 0; font-size: 18px; font-weight: 600;">
+                    Need Help? We're Here for You! 💬
+                  </h3>
+                  <p style="color: #4a5568; margin: 0 0 15px 0; font-size: 15px; line-height: 1.5;">
+                    Our support team is ready to help you get the most out of StyleHaven.
+                  </p>
+                  <a href="mailto:${supportEmail}" style="color: #667eea; text-decoration: none; font-weight: 600; font-size: 15px;">
+                    📧 ${supportEmail}
+                  </a>
+                </div>
+
+                <!-- Social Proof -->
+                <div style="background: #edf2f7; padding: 20px; border-radius: 12px; text-align: center; margin: 25px 0;">
+                  <p style="color: #4a5568; margin: 0; font-size: 14px; line-height: 1.5;">
+                    ⭐⭐⭐⭐⭐<br>
+                    <em>"StyleHaven has the most authentic receipt templates I've ever seen. Professional quality!"</em><br>
+                    <strong>- Satisfied Customer</strong>
+                  </p>
+                </div>
+              </div>
+
+              <!-- Footer -->
+              <div style="background: #2d3748; padding: 30px; text-align: center; color: white;">
+                <h4 style="margin: 0 0 15px 0; font-size: 18px; font-weight: 600;">
+                  Welcome to the StyleHaven Family! 🎉
+                </h4>
+                <p style="margin: 0 0 20px 0; color: #a0aec0; font-size: 14px; line-height: 1.5;">
+                  Thank you for choosing StyleHaven for your receipt generation needs.<br>
+                  We're excited to see what you'll create!
+                </p>
+                
+                <div style="border-top: 1px solid #4a5568; padding-top: 20px; margin-top: 20px;">
+                  <p style="margin: 0; color: #a0aec0; font-size: 12px;">
+                    This email was sent to ${userEmail}<br>
+                    StyleHaven Receipt Generator • Professional Receipt Templates<br>
+                    <a href="${process.env.NEXT_PUBLIC_BASE_URL}" style="color: #90cdf4; text-decoration: none;">Visit Website</a>
+                  </p>
+                </div>
+              </div>
+            </div>
+          </body>
+          </html>
+        `,
+        text: `
+Welcome to StyleHaven, ${userName}!
+
+We're thrilled to have you join our community! Your account has been successfully created.
+
+What you can do with StyleHaven:
+✓ Generate premium receipts with authentic brand templates
+✓ Access professional designs for Apple, Nike, Bape, and more
+✓ Easy customization with your personal details
+✓ Instant email delivery of your receipts
+
+Get started: ${dashboardUrl}
+
+Pricing:
+- Lifetime Access: $25 one-time
+- Monthly Plan: $5/month
+
+Need help? Contact us at ${supportEmail}
+
+Thank you for choosing StyleHaven!
+        `
+      }
+
+      await transporter.sendMail(mailOptions)
+      console.log('✅ Welcome email sent successfully to:', userEmail)
+      
+      return { success: true }
+    } catch (error: any) {
+      console.error('❌ Welcome email sending failed:', error.message)
+      return { success: false, error: error.message }
+    }
+  }
+
   // Simple Hello World email sender
   static async sendHelloWorld(
     toEmail: string,
@@ -114,10 +304,8 @@ export class EmailService {
   static async testConnection(): Promise<{ success: boolean; error?: string }> {
     try {
       await transporter.verify()
-      console.log('SMTP connection verified successfully')
       return { success: true }
     } catch (error: any) {
-      console.error('SMTP connection failed:', error)
       return { success: false, error: error.message }
     }
   }
