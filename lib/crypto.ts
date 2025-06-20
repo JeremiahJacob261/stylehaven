@@ -1,6 +1,7 @@
 import axios from 'axios'
 import crypto from 'crypto'
 
+// Use sandbox for testing
 const NOWPAYMENTS_API_URL = 'https://api.nowpayments.io/v1'
 const NOWPAYMENTS_API_KEY = process.env.NOWPAYMENTS_API_KEY!
 
@@ -23,7 +24,7 @@ export interface CryptoPaymentResponse {
   pay_currency: string
   price_amount: number
   price_currency: string
-  payment_url: string
+  payment_url?: string
   qr_code?: string
 }
 
@@ -40,10 +41,18 @@ export class CryptoPaymentService {
       const response = await axios.get(`${NOWPAYMENTS_API_URL}/currencies`, {
         headers: this.getHeaders()
       })
-      return response.data.currencies
+      
+      // Filter to only our supported currencies
+      const supportedCurrencies = ['sol', 'ltc', 'xrp']
+      const availableCurrencies = response.data.currencies || []
+      
+      return supportedCurrencies.filter(currency => 
+        availableCurrencies.includes(currency)
+      )
     } catch (error) {
       console.error('Error fetching currencies:', error)
-      return ['btc', 'eth', 'ltc', 'xmr', 'usdt']
+      // Return fallback supported currencies
+      return ['sol', 'ltc', 'xrp']
     }
   }
 
@@ -54,10 +63,20 @@ export class CryptoPaymentService {
         paymentData,
         { headers: this.getHeaders() }
       )
-      return response.data
+      
+      return {
+        payment_id: response.data.payment_id,
+        payment_status: response.data.payment_status,
+        pay_address: response.data.pay_address,
+        pay_amount: response.data.pay_amount,
+        pay_currency: response.data.pay_currency,
+        price_amount: response.data.price_amount,
+        price_currency: response.data.price_currency,
+        payment_url: response.data.payment_url
+      }
     } catch (error: any) {
-      console.error('Crypto payment creation error:', error)
-      throw new Error('Failed to create crypto payment')
+      console.error('Crypto payment creation error:', error.response?.data || error)
+      throw new Error(error.response?.data?.message || 'Failed to create crypto payment')
     }
   }
 
@@ -75,23 +94,48 @@ export class CryptoPaymentService {
   }
 
   static verifyIPN(payload: string, signature: string): boolean {
-    const expectedSignature = crypto
-      .createHmac('sha512', process.env.NOWPAYMENTS_IPN_SECRET!)
-      .update(payload)
-      .digest('hex')
-    
-    return signature === expectedSignature
+    try {
+      const expectedSignature = crypto
+        .createHmac('sha512', process.env.NOWPAYMENTS_IPN_SECRET!)
+        .update(payload)
+        .digest('hex')
+      
+      return signature === expectedSignature
+    } catch (error) {
+      console.error('IPN verification error:', error)
+      return false
+    }
   }
 
-  // Direct wallet payments (for maximum anonymity)
-  static generateDirectPaymentAddress(currency: string): string {
-    switch (currency.toLowerCase()) {
-      case 'btc':
-        return process.env.BITCOIN_WALLET_ADDRESS || ''
-      case 'xmr':
-        return process.env.MONERO_WALLET_ADDRESS || ''
-      default:
-        return ''
+  // Get minimum payment amount for a currency
+  static async getMinimumAmount(currency: string): Promise<number> {
+    try {
+      const response = await axios.get(
+        `${NOWPAYMENTS_API_URL}/min-amount?currency_from=${currency}&currency_to=usd`,
+        { headers: this.getHeaders() }
+      )
+      return response.data.min_amount || 0
+    } catch (error) {
+      console.error('Error getting minimum amount:', error)
+      return 0
+    }
+  }
+
+  // Get estimated price in crypto
+  static async getEstimatedPrice(
+    amount: number, 
+    fromCurrency: string, 
+    toCurrency: string
+  ): Promise<number> {
+    try {
+      const response = await axios.get(
+        `${NOWPAYMENTS_API_URL}/estimate?amount=${amount}&currency_from=${fromCurrency}&currency_to=${toCurrency}`,
+        { headers: this.getHeaders() }
+      )
+      return response.data.estimated_amount || 0
+    } catch (error) {
+      console.error('Error getting estimated price:', error)
+      return 0
     }
   }
 }

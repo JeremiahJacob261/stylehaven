@@ -1,206 +1,304 @@
 "use client";
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useAuth } from '@/contexts/AuthContext'
+import { usePayment } from '@/hooks/usePayment'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
-import { Separator } from '@/components/ui/separator'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { 
-  CreditCard, 
   Check, 
-  Star, 
-  Zap, 
   Shield,
   Bitcoin,
-  Wallet,
   Clock,
   Crown,
-  Gift
+  AlertCircle,
+  Copy,
+  CreditCard,
+  Zap,
+  Calendar,
+  Star
 } from 'lucide-react'
 
 interface PaymentPageProps {
   onPaymentSuccess: () => void
 }
 
-interface SubscriptionPlan {
-  id: string
-  name: string
-  price: number
-  duration: string
-  savings?: string
-  features: string[]
-  popular?: boolean
+interface CryptoPaymentData {
+  payment_id: string
+  pay_address: string
+  pay_amount: number
+  pay_currency: string
+  price_amount: number
+  price_currency: string
+  payment_url?: string
+}
+
+declare global {
+  interface Window {
+    paypal: any;
+  }
 }
 
 export default function PaymentPage({ onPaymentSuccess }: PaymentPageProps) {
-  const { user, refreshUser } = useAuth()
-  const [isProcessing, setIsProcessing] = useState(false)
-  const [selectedPlan, setSelectedPlan] = useState<string>('monthly')
-  const [selectedCrypto, setSelectedCrypto] = useState<string>('btc')
-  const [availableCryptos, setAvailableCryptos] = useState<string[]>(['btc', 'eth', 'xmr', 'usdt'])
-  const [cryptoPaymentData, setCryptoPaymentData] = useState<any>(null)
+  const { user } = useAuth()
+  const { 
+    paymentState, 
+    resetPaymentState, 
+    processPayPalPayment, 
+    processCryptoPayment, 
+    checkCryptoPaymentStatus 
+  } = usePayment()
+  
+  const [selectedCrypto, setSelectedCrypto] = useState<string>('sol')
+  const [cryptoPaymentData, setCryptoPaymentData] = useState<CryptoPaymentData | null>(null)
+  const [paymentStatus, setPaymentStatus] = useState<string>('pending')
+  const [timeLeft, setTimeLeft] = useState<number>(3600) // 1 hour in seconds
+  const [selectedPlan, setSelectedPlan] = useState<'lifetime' | 'monthly'>('lifetime')
+  
+  const paypalOneTimeRef = useRef<HTMLDivElement>(null)
+  const paypalSubscriptionRef = useRef<HTMLDivElement>(null)
 
-  const subscriptionPlans: SubscriptionPlan[] = [
-    {
-      id: 'monthly',
-      name: 'Monthly',
-      price: 4.99,
-      duration: 'per month',
-      features: [
-        'Generate unlimited receipts',
-        'All brand templates included',
-        'Email delivery',
-        'Priority support',
-        'Mobile-friendly interface'
-      ]
-    },
-    {
-      id: 'yearly',
-      name: 'Yearly',
-      price: 39.99,
-      duration: 'per year',
-      savings: 'Save 33%',
-      popular: true,
-      features: [
-        'Everything in Monthly',
-        'Save $20 per year',
-        'Premium templates',
-        'Advanced customization',
-        'Export to multiple formats',
-        'API access (coming soon)'
-      ]
-    }
-  ]
-
-  useEffect(() => {
-    fetchAvailableCryptos()
-  }, [])
-
-  const fetchAvailableCryptos = async () => {
-    try {
-      const response = await fetch('/api/crypto/currencies')
-      const data = await response.json()
-      if (data.success) {
-        setAvailableCryptos(data.currencies)
-      }
-    } catch (error) {
-      console.error('Failed to fetch crypto currencies:', error)
-    }
+  // Plan pricing
+  const PLAN_PRICES = {
+    lifetime: 25,
+    monthly: 5
   }
 
-  const handlePayPalPayment = async () => {
-    if (!user) return
+  // Available cryptocurrencies
+  const availableCryptos = [
+    { value: 'sol', label: 'Solana (SOL)', icon: '◎' },
+    { value: 'ltc', label: 'Litecoin (LTC)', icon: 'Ł' },
+    { value: 'xrp', label: 'Ripple (XRP)', icon: 'XRP' }
+  ]
 
-    setIsProcessing(true)
-    try {
-      const response = await fetch('/api/paypal/create-subscription', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('session_token')}`
-        },
-        body: JSON.stringify({
-          planType: selectedPlan,
-          userId: user.id
+  // Timer for crypto payments
+  useEffect(() => {
+    let interval: NodeJS.Timeout
+    if (cryptoPaymentData && timeLeft > 0) {
+      interval = setInterval(() => {
+        setTimeLeft(prev => {
+          if (prev <= 1) {
+            setCryptoPaymentData(null)
+            return 0
+          }
+          return prev - 1
         })
-      })
-
-      const data = await response.json()
-      
-      if (data.success) {
-        // Redirect to PayPal
-        window.location.href = data.approvalUrl
-      } else {
-        alert('PayPal payment initialization failed: ' + data.error)
-      }
-    } catch (error) {
-      console.error('PayPal payment error:', error)
-      alert('PayPal payment failed. Please try again.')
-    } finally {
-      setIsProcessing(false)
+      }, 1000)
     }
+    return () => clearInterval(interval)
+  }, [cryptoPaymentData, timeLeft])
+
+  // Status checking for crypto payments
+  useEffect(() => {
+    let statusInterval: NodeJS.Timeout
+    if (cryptoPaymentData) {
+      statusInterval = setInterval(async () => {
+        const status = await checkCryptoPaymentStatus(cryptoPaymentData.payment_id)
+        if (status === 'finished' || status === 'confirmed') {
+          onPaymentSuccess()
+        }
+      }, 10000)
+    }
+    return () => clearInterval(statusInterval)
+  }, [cryptoPaymentData, checkCryptoPaymentStatus, onPaymentSuccess])
+
+  // Watch for successful crypto payment creation and set the payment data
+  useEffect(() => {
+    if (paymentState.success && paymentState.data && !cryptoPaymentData) {
+      console.log('Setting crypto payment data:', paymentState.data)
+      setCryptoPaymentData(paymentState.data)
+      setTimeLeft(3600)
+      setPaymentStatus('waiting')
+    }
+  }, [paymentState.success, paymentState.data, cryptoPaymentData])
+
+  // PayPal button initialization
+  useEffect(() => {
+    if (window.paypal) {
+      // One-time payment button
+      if (paypalOneTimeRef.current && selectedPlan === 'lifetime') {
+        paypalOneTimeRef.current.innerHTML = ''
+        
+        window.paypal.Buttons({
+          createOrder: (data: any, actions: any) => {
+            return actions.order.create({
+              intent: "CAPTURE",
+              purchase_units: [{
+                description: "NateTube Lifetime Access",
+                amount: {
+                  currency_code: "USD",
+                  value: PLAN_PRICES.lifetime.toString(),
+                },
+              }],
+            })
+          },
+          onApprove: async (data: any, actions: any) => {
+            const order = await actions.order.capture()
+            await processPayPalPayment({
+              orderID: data.orderID,
+              payerID: data.payerID,
+              facilitatorAccessToken: data.facilitatorAccessToken,
+            }, 'lifetime', PLAN_PRICES.lifetime)
+          },
+          onError: (err: any) => {
+            console.error("PayPal error:", err)
+          },
+        }).render(paypalOneTimeRef.current)
+      }
+
+      // Monthly subscription button (simplified for demo)
+      if (paypalSubscriptionRef.current && selectedPlan === 'monthly') {
+        paypalSubscriptionRef.current.innerHTML = ''
+        
+        window.paypal.Buttons({
+          createOrder: (data: any, actions: any) => {
+            return actions.order.create({
+              intent: "CAPTURE",
+              purchase_units: [{
+                description: "NateTube Monthly Subscription",
+                amount: {
+                  currency_code: "USD",
+                  value: PLAN_PRICES.monthly.toString(),
+                },
+              }],
+            })
+          },
+          onApprove: async (data: any, actions: any) => {
+            const order = await actions.order.capture()
+            await processPayPalPayment({
+              orderID: data.orderID,
+              payerID: data.payerID,
+              facilitatorAccessToken: data.facilitatorAccessToken,
+            }, 'monthly', PLAN_PRICES.monthly)
+          },
+          onError: (err: any) => {
+            console.error("PayPal subscription error:", err)
+          },
+        }).render(paypalSubscriptionRef.current)
+      }
+    }
+  }, [selectedPlan, processPayPalPayment])
+
+  // Handle payment success
+  useEffect(() => {
+    if (paymentState.success && !paymentState.data) {
+      // This is for PayPal payments (no crypto data)
+      onPaymentSuccess()
+    }
+  }, [paymentState.success, paymentState.data, onPaymentSuccess])
+
+  const formatTime = (seconds: number) => {
+    const minutes = Math.floor(seconds / 60)
+    const remainingSeconds = seconds % 60
+    return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`
+  }
+
+  const copyToClipboard = (text: string) => {
+    navigator.clipboard.writeText(text)
   }
 
   const handleCryptoPayment = async () => {
-    if (!user) return
-
-    setIsProcessing(true)
-    try {
-      const selectedPlanData = subscriptionPlans.find(p => p.id === selectedPlan)
-      
-      const response = await fetch('/api/crypto/create-payment', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('session_token')}`
-        },
-        body: JSON.stringify({
-          planType: selectedPlan,
-          cryptoCurrency: selectedCrypto,
-          userId: user.id,
-          amount: selectedPlanData?.price
-        })
-      })
-
-      const data = await response.json()
-      
-      if (data.success) {
-        setCryptoPaymentData(data.payment)
-      } else {
-        alert('Crypto payment initialization failed: ' + data.error)
-      }
-    } catch (error) {
-      console.error('Crypto payment error:', error)
-      alert('Crypto payment failed. Please try again.')
-    } finally {
-      setIsProcessing(false)
-    }
+    const amount = PLAN_PRICES[selectedPlan]
+    console.log(`Initiating crypto payment for ${selectedCrypto} - $${amount}`)
+    await processCryptoPayment(selectedCrypto, selectedPlan, amount)
+    // The useEffect will handle setting cryptoPaymentData when paymentState.success becomes true
   }
 
-  const selectedPlanData = subscriptionPlans.find(p => p.id === selectedPlan)
+  const selectedCryptoData = availableCryptos.find(c => c.value === selectedCrypto)
 
+  // Crypto payment display
   if (cryptoPaymentData) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 flex items-center justify-center p-4">
         <div className="w-full max-w-md">
-          <Card>
-            <CardHeader className="text-center">
+          <Card className="shadow-xl border-0">
+            <CardHeader className="text-center bg-gradient-to-r from-orange-500 to-red-600 text-white rounded-t-lg">
               <CardTitle className="flex items-center justify-center space-x-2">
-                <Bitcoin className="w-6 h-6 text-orange-500" />
+                <Bitcoin className="w-6 h-6" />
                 <span>Complete Payment</span>
               </CardTitle>
-              <CardDescription>
-                Send {selectedCrypto.toUpperCase()} to the address below
+              <CardDescription className="text-orange-100">
+                Send {selectedCryptoData?.icon} {selectedCrypto.toUpperCase()} to complete your NateTube purchase
               </CardDescription>
+              {paymentStatus === 'waiting' && (
+                <Badge variant="secondary" className="mx-auto bg-white/20 text-white border-white/30">
+                  <AlertCircle className="w-3 h-3 mr-1" />
+                  Waiting for payment...
+                </Badge>
+              )}
             </CardHeader>
-            <CardContent className="space-y-4">
+            <CardContent className="space-y-6 p-6">
               <div className="text-center">
-                <div className="bg-gray-100 p-4 rounded-lg mb-4">
+                <div className="bg-gray-50 p-6 rounded-xl mb-6 border-2 border-dashed border-gray-200">
                   <img 
                     src={`https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${cryptoPaymentData.pay_address}`}
                     alt="Payment QR Code"
-                    className="mx-auto mb-4"
+                    className="mx-auto mb-4 rounded-lg shadow-md"
                   />
-                  <p className="text-sm text-gray-600 mb-2">Send exactly:</p>
-                  <p className="text-xl font-bold">{cryptoPaymentData.pay_amount} {selectedCrypto.toUpperCase()}</p>
-                  <p className="text-sm text-gray-600 mt-2">To address:</p>
-                  <p className="text-xs bg-white p-2 rounded border break-all">{cryptoPaymentData.pay_address}</p>
+                  
+                  <div className="space-y-4">
+                    <div className="bg-white p-4 rounded-lg border">
+                      <p className="text-sm text-gray-600 mb-2 font-medium">Send exactly:</p>
+                      <div className="flex items-center justify-between">
+                        <p className="text-xl font-bold text-gray-900">{cryptoPaymentData.pay_amount} {selectedCrypto.toUpperCase()}</p>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => copyToClipboard(cryptoPaymentData.pay_amount.toString())}
+                          className="ml-2"
+                        >
+                          <Copy className="w-3 h-3" />
+                        </Button>
+                      </div>
+                    </div>
+                    
+                    <div className="bg-white p-4 rounded-lg border">
+                      <p className="text-sm text-gray-600 mb-2 font-medium">To address:</p>
+                      <div className="flex items-center space-x-2">
+                        <p className="text-xs bg-gray-50 p-3 rounded border flex-1 font-mono break-all">
+                          {cryptoPaymentData.pay_address}
+                        </p>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => copyToClipboard(cryptoPaymentData.pay_address)}
+                        >
+                          <Copy className="w-3 h-3" />
+                        </Button>
+                      </div>
+                    </div>
+                  </div>
                 </div>
                 
-                <div className="flex items-center justify-center space-x-2 text-sm text-gray-600 mb-4">
-                  <Clock className="w-4 h-4" />
-                  <span>Payment expires in 60 minutes</span>
+                <div className="flex items-center justify-center space-x-2 text-sm text-gray-600 mb-6 bg-yellow-50 p-3 rounded-lg border border-yellow-200">
+                  <Clock className="w-4 h-4 text-yellow-600" />
+                  <span className="font-medium text-yellow-800">Payment expires in {formatTime(timeLeft)}</span>
                 </div>
 
-                <Button
-                  onClick={() => setCryptoPaymentData(null)}
-                  variant="outline"
-                  className="w-full"
-                >
-                  Back to Payment Options
-                </Button>
+                <div className="space-y-3">
+                  <Button
+                    onClick={() => checkCryptoPaymentStatus(cryptoPaymentData.payment_id)}
+                    variant="default"
+                    className="w-full bg-green-600 hover:bg-green-700"
+                    disabled={paymentState.isProcessing}
+                  >
+                    {paymentState.isProcessing ? 'Checking...' : 'Check Payment Status'}
+                  </Button>
+                  
+                  <Button
+                    onClick={() => {
+                      setCryptoPaymentData(null)
+                      resetPaymentState()
+                    }}
+                    variant="outline"
+                    className="w-full"
+                  >
+                    Back to Payment Options
+                  </Button>
+                </div>
               </div>
             </CardContent>
           </Card>
@@ -210,162 +308,294 @@ export default function PaymentPage({ onPaymentSuccess }: PaymentPageProps) {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 flex items-center justify-center p-4">
       <div className="w-full max-w-4xl">
-        <div className="text-center mb-8">
-          <div className="w-16 h-16 bg-gradient-to-br from-blue-600 to-purple-600 rounded-2xl mx-auto mb-4 flex items-center justify-center">
-            <Crown className="w-8 h-8 text-white" />
+        <div className="text-center mb-10">
+          <div className="w-20 h-20 bg-gradient-to-br from-blue-600 via-purple-600 to-indigo-600 rounded-3xl mx-auto mb-6 flex items-center justify-center shadow-lg">
+            <Crown className="w-10 h-10 text-white" />
           </div>
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">
-            Choose Your Plan
+          <h1 className="text-4xl font-bold text-gray-900 mb-3">
+            Unlock NateTube Access
           </h1>
-          <p className="text-gray-600">
-            Unlock unlimited receipt generation with NateTube
+          <p className="text-xl text-gray-600 max-w-2xl mx-auto">
+            Choose your plan and start generating professional receipts with unlimited access to all features
           </p>
         </div>
 
         {/* Plan Selection */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-          {subscriptionPlans.map((plan) => (
-            <Card 
-              key={plan.id}
-              className={`relative cursor-pointer transition-all ${
-                selectedPlan === plan.id 
-                  ? 'ring-2 ring-blue-600 border-blue-600' 
-                  : 'hover:border-gray-400'
-              } ${plan.popular ? 'md:scale-105' : ''}`}
-              onClick={() => setSelectedPlan(plan.id)}
-            >
-              {plan.popular && (
-                <div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
-                  <Badge className="bg-gradient-to-r from-blue-600 to-purple-600 text-white">
-                    <Star className="w-3 h-3 mr-1" />
-                    Most Popular
-                  </Badge>
+        <div className="grid md:grid-cols-2 gap-8 mb-10">
+          {/* Lifetime Plan */}
+          <Card className={`cursor-pointer transition-all duration-300 hover:scale-105 ${selectedPlan === 'lifetime' ? 'ring-4 ring-blue-500 bg-gradient-to-br from-blue-50 to-indigo-50 shadow-xl' : 'hover:shadow-lg border-2 border-gray-200'}`}
+                onClick={() => setSelectedPlan('lifetime')}>
+            <CardHeader className="relative">
+              <div className="absolute -top-3 -right-3">
+                <Badge className="bg-gradient-to-r from-yellow-400 to-orange-500 text-white px-3 py-1 font-semibold">
+                  <Star className="w-3 h-3 mr-1" />
+                  Most Popular
+                </Badge>
+              </div>
+              <CardTitle className="flex items-center justify-between">
+                <div className="flex items-center space-x-3">
+                  <div className="w-12 h-12 bg-gradient-to-br from-yellow-400 to-orange-500 rounded-xl flex items-center justify-center">
+                    <Crown className="w-6 h-6 text-white" />
+                  </div>
+                  <div>
+                    <h3 className="text-xl font-bold">Lifetime Access</h3>
+                    <p className="text-sm text-gray-600 font-normal">One-time payment, forever yours</p>
+                  </div>
                 </div>
-              )}
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              <div className="text-center">
+                <div className="text-4xl font-bold text-gray-900 mb-2">
+                  ${PLAN_PRICES.lifetime}
+                  <span className="text-lg text-gray-500 font-normal"> one-time</span>
+                </div>
+                <p className="text-green-600 font-semibold">Save $35+ vs monthly</p>
+              </div>
               
-              <CardHeader>
-                <CardTitle className="flex items-center justify-between">
-                  <span>{plan.name}</span>
-                  {selectedPlan === plan.id && (
-                    <Check className="w-5 h-5 text-blue-600" />
-                  )}
-                </CardTitle>
-                <div className="flex items-baseline space-x-2">
-                  <span className="text-3xl font-bold">${plan.price}</span>
-                  <span className="text-sm text-gray-500">{plan.duration}</span>
-                  {plan.savings && (
-                    <Badge variant="secondary" className="text-green-600">
-                      <Gift className="w-3 h-3 mr-1" />
-                      {plan.savings}
-                    </Badge>
-                  )}
+              <div className="space-y-3">
+                <div className="flex items-center space-x-3">
+                  <Check className="w-5 h-5 text-green-600 flex-shrink-0" />
+                  <span className="text-gray-700">Unlimited receipt generation</span>
                 </div>
-              </CardHeader>
+                <div className="flex items-center space-x-3">
+                  <Check className="w-5 h-5 text-green-600 flex-shrink-0" />
+                  <span className="text-gray-700">All brand templates included</span>
+                </div>
+                <div className="flex items-center space-x-3">
+                  <Check className="w-5 h-5 text-green-600 flex-shrink-0" />
+                  <span className="text-gray-700">No monthly fees ever</span>
+                </div>
+                <div className="flex items-center space-x-3">
+                  <Check className="w-5 h-5 text-green-600 flex-shrink-0" />
+                  <span className="text-gray-700">Priority customer support</span>
+                </div>
+                <div className="flex items-center space-x-3">
+                  <Check className="w-5 h-5 text-green-600 flex-shrink-0" />
+                  <span className="text-gray-700">Future updates included</span>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Monthly Plan */}
+          <Card className={`cursor-pointer transition-all duration-300 hover:scale-105 ${selectedPlan === 'monthly' ? 'ring-4 ring-blue-500 bg-gradient-to-br from-blue-50 to-indigo-50 shadow-xl' : 'hover:shadow-lg border-2 border-gray-200'}`}
+                onClick={() => setSelectedPlan('monthly')}>
+            <CardHeader>
+              <CardTitle className="flex items-center justify-between">
+                <div className="flex items-center space-x-3">
+                  <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-xl flex items-center justify-center">
+                    <Calendar className="w-6 h-6 text-white" />
+                  </div>
+                  <div>
+                    <h3 className="text-xl font-bold">Monthly Plan</h3>
+                    <p className="text-sm text-gray-600 font-normal">Flexible monthly billing</p>
+                  </div>
+                </div>
+                <Badge variant="outline" className="border-blue-200 text-blue-700">Flexible</Badge>
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              <div className="text-center">
+                <div className="text-4xl font-bold text-gray-900 mb-2">
+                  ${PLAN_PRICES.monthly}
+                  <span className="text-lg text-gray-500 font-normal">/month</span>
+                </div>
+                <p className="text-gray-600">Cancel anytime, no commitment</p>
+              </div>
               
-              <CardContent>
-                <div className="space-y-3">
-                  {plan.features.map((feature, index) => (
-                    <div key={index} className="flex items-center space-x-2">
-                      <Check className="w-4 h-4 text-green-600 flex-shrink-0" />
-                      <span className="text-sm">{feature}</span>
-                    </div>
-                  ))}
+              <div className="space-y-3">
+                <div className="flex items-center space-x-3">
+                  <Check className="w-5 h-5 text-green-600 flex-shrink-0" />
+                  <span className="text-gray-700">Unlimited receipt generation</span>
                 </div>
-              </CardContent>
-            </Card>
-          ))}
+                <div className="flex items-center space-x-3">
+                  <Check className="w-5 h-5 text-green-600 flex-shrink-0" />
+                  <span className="text-gray-700">All brand templates included</span>
+                </div>
+                <div className="flex items-center space-x-3">
+                  <Check className="w-5 h-5 text-green-600 flex-shrink-0" />
+                  <span className="text-gray-700">Cancel anytime</span>
+                </div>
+                <div className="flex items-center space-x-3">
+                  <Check className="w-5 h-5 text-green-600 flex-shrink-0" />
+                  <span className="text-gray-700">Email support</span>
+                </div>
+                <div className="flex items-center space-x-3">
+                  <Check className="w-5 h-5 text-green-600 flex-shrink-0" />
+                  <span className="text-gray-700">Monthly updates</span>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
         </div>
 
-        {/* Payment Methods */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center space-x-2">
-              <Shield className="w-5 h-5 text-green-600" />
-              <span>Secure Payment Methods</span>
-            </CardTitle>
-            <CardDescription>
-              Choose your preferred payment method for the {selectedPlanData?.name} plan
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-6">
-            {/* PayPal Payment */}
-            <div className="space-y-4">
-              <h3 className="font-medium text-gray-900">Credit Card & PayPal</h3>
-              <Button
-                onClick={handlePayPalPayment}
-                disabled={isProcessing}
-                className="w-full h-12 bg-blue-600 hover:bg-blue-700"
-                size="lg"
-              >
-                <CreditCard className="w-5 h-5 mr-2" />
-                {isProcessing ? 'Processing...' : `Pay $${selectedPlanData?.price} with PayPal`}
-              </Button>
-            </div>
-
-            <div className="relative">
-              <Separator />
-              <div className="absolute inset-0 flex items-center justify-center">
-                <span className="bg-white px-2 text-xs text-gray-500">OR PAY ANONYMOUSLY</span>
-              </div>
-            </div>
-
-            {/* Crypto Payment */}
-            <div className="space-y-4">
-              <h3 className="font-medium text-gray-900">Cryptocurrency (Anonymous)</h3>
-              <div className="flex space-x-4">
-                <Select value={selectedCrypto} onValueChange={setSelectedCrypto}>
-                  <SelectTrigger className="w-32">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {availableCryptos.map((crypto) => (
-                      <SelectItem key={crypto} value={crypto}>
-                        {crypto.toUpperCase()}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                <Button
-                  onClick={handleCryptoPayment}
-                  disabled={isProcessing}
-                  variant="outline"
-                  className="flex-1 h-12 border-2 border-orange-200 hover:border-orange-300 hover:bg-orange-50"
-                  size="lg"
+        {/* Error Display */}
+        {paymentState.error && (
+          <Card className="mb-8 border-red-200 bg-red-50 shadow-lg">
+            <CardContent className="py-6">
+              <div className="flex items-start space-x-3">
+                <AlertCircle className="w-5 h-5 text-red-600 mt-0.5 flex-shrink-0" />
+                <div className="flex-1">
+                  <p className="text-red-800 font-semibold">Payment Error</p>
+                  <p className="text-red-700 mt-1">{paymentState.error}</p>
+                </div>
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  onClick={resetPaymentState}
+                  className="border-red-300 text-red-700 hover:bg-red-100"
                 >
-                  <Bitcoin className="w-5 h-5 mr-2 text-orange-600" />
-                  {isProcessing ? 'Processing...' : `Pay with ${selectedCrypto.toUpperCase()}`}
+                  Try Again
                 </Button>
               </div>
-              <p className="text-xs text-gray-500">
-                * Crypto payments are processed anonymously with no KYC required
-              </p>
-            </div>
+            </CardContent>
+          </Card>
+        )}
 
-            <div className="flex items-center justify-center space-x-6 pt-4 border-t border-gray-200">
-              <div className="flex items-center space-x-1 text-xs text-gray-500">
-                <Shield className="w-3 h-3" />
-                <span>SSL Secured</span>
-              </div>
-              <div className="flex items-center space-x-1 text-xs text-gray-500">
-                <Wallet className="w-3 h-3" />
-                <span>Cancel Anytime</span>
-              </div>
-              <div className="flex items-center space-x-1 text-xs text-gray-500">
-                <Zap className="w-3 h-3" />
-                <span>Instant Access</span>
+        {/* Payment Methods */}
+        <Card className="shadow-xl border-0">
+          <CardHeader className="bg-gradient-to-r from-gray-50 to-gray-100 rounded-t-lg">
+            <CardTitle className="flex items-center space-x-3">
+              <Shield className="w-6 h-6 text-green-600" />
+              <span className="text-xl">Choose Payment Method</span>
+            </CardTitle>
+            <CardDescription className="text-lg">
+              Selected: <span className="font-semibold text-gray-900">
+                {selectedPlan === 'lifetime' ? 'Lifetime Access' : 'Monthly Subscription'} - 
+                ${PLAN_PRICES[selectedPlan]}{selectedPlan === 'monthly' ? '/month' : ' one-time'}
+              </span>
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="p-8">
+            <Tabs defaultValue="paypal" className="w-full">
+              <TabsList className="grid w-full grid-cols-2 h-14 mb-8">
+                <TabsTrigger value="paypal" className="flex items-center space-x-3 text-base">
+                  <CreditCard className="w-5 h-5" />
+                  <span>PayPal & Cards</span>
+                </TabsTrigger>
+                <TabsTrigger value="crypto" className="flex items-center space-x-3 text-base">
+                  <Bitcoin className="w-5 h-5" />
+                  <span>Cryptocurrency</span>
+                </TabsTrigger>
+              </TabsList>
+              
+              <TabsContent value="paypal" className="space-y-6">
+                <div className="text-center py-6">
+                  <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <CreditCard className="w-8 h-8 text-blue-600" />
+                  </div>
+                  <h3 className="text-xl font-semibold mb-2">Secure Payment with PayPal</h3>
+                  <p className="text-gray-600 mb-6">
+                    Pay safely with PayPal, credit card, or debit card. Your payment information is protected.
+                  </p>
+                  
+                  {paymentState.isProcessing && (
+                    <div className="bg-blue-50 p-4 rounded-lg mb-6 border border-blue-200">
+                      <div className="flex items-center justify-center space-x-2">
+                        <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-blue-600"></div>
+                        <span className="text-blue-800 font-medium">Processing payment...</span>
+                      </div>
+                    </div>
+                  )}
+                  
+                  {selectedPlan === 'lifetime' ? (
+                    <div ref={paypalOneTimeRef} className="min-h-[50px]"></div>
+                  ) : (
+                    <div ref={paypalSubscriptionRef} className="min-h-[50px]"></div>
+                  )}
+                </div>
+              </TabsContent>
+              
+              <TabsContent value="crypto" className="space-y-6">
+                <div className="text-center mb-6">
+                  <div className="w-16 h-16 bg-orange-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <Bitcoin className="w-8 h-8 text-orange-600" />
+                  </div>
+                  <h3 className="text-xl font-semibold mb-2">Pay with Cryptocurrency</h3>
+                  <p className="text-gray-600">
+                    Anonymous payments with popular cryptocurrencies. No personal information required.
+                  </p>
+                </div>
+
+                <div className="bg-gray-50 p-6 rounded-xl border">
+                  <label className="block text-sm font-semibold text-gray-800 mb-3">
+                    Select Cryptocurrency
+                  </label>
+                  <Select value={selectedCrypto} onValueChange={setSelectedCrypto}>
+                    <SelectTrigger className="w-full h-12 text-base">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {availableCryptos.map((crypto) => (
+                        <SelectItem key={crypto.value} value={crypto.value}>
+                          <div className="flex items-center space-x-3 py-2">
+                            <span className="text-xl">{crypto.icon}</span>
+                            <span className="font-medium">{crypto.label}</span>
+                          </div>
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                
+                <Button
+                  onClick={handleCryptoPayment}
+                  disabled={paymentState.isProcessing}
+                  className="w-full h-14 bg-gradient-to-r from-orange-500 to-red-600 hover:from-orange-600 hover:to-red-700 text-lg font-semibold"
+                  size="lg"
+                >
+                  <Bitcoin className="w-6 h-6 mr-3" />
+                  {paymentState.isProcessing ? 'Initializing...' : `Pay $${PLAN_PRICES[selectedPlan]} with ${selectedCryptoData?.label}`}
+                </Button>
+                
+                <div className="grid grid-cols-3 gap-4 text-center text-sm">
+                  <div className="flex flex-col items-center space-y-1">
+                    <Shield className="w-4 h-4 text-green-600" />
+                    <span className="text-gray-600">Anonymous</span>
+                  </div>
+                  <div className="flex flex-col items-center space-y-1">
+                    <Zap className="w-4 h-4 text-blue-600" />
+                    <span className="text-gray-600">No KYC</span>
+                  </div>
+                  <div className="flex flex-col items-center space-y-1">
+                    <Clock className="w-4 h-4 text-purple-600" />
+                    <span className="text-gray-600">Fast & Secure</span>
+                  </div>
+                </div>
+              </TabsContent>
+            </Tabs>
+
+            <div className="mt-8 pt-6 border-t border-gray-200">
+              <div className="flex items-center justify-center space-x-8 text-sm text-gray-500">
+                <div className="flex items-center space-x-2">
+                  <Shield className="w-4 h-4 text-green-600" />
+                  <span>256-bit SSL Encryption</span>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <Zap className="w-4 h-4 text-blue-600" />
+                  <span>Instant Access</span>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <Clock className="w-4 h-4 text-purple-600" />
+                  <span>24/7 Support</span>
+                </div>
               </div>
             </div>
           </CardContent>
         </Card>
 
-        <div className="text-center text-sm text-gray-500 mt-6">
-          <p>
-            Questions? Contact support at{' '}
-            <a href="mailto:support@natetube.com" className="text-blue-600 hover:underline">
-              support@natetube.com
+        <div className="text-center text-gray-500 mt-8">
+          <p className="text-lg">
+            Questions about payment? Contact us at{' '}
+            <a href="mailto:support@stylehaven.com" className="text-blue-600 hover:underline font-semibold">
+              support@stylehaven.com
             </a>
+          </p>
+          <p className="text-sm mt-2">
+            Secure payments powered by PayPal and NOWPayments • 30-day money-back guarantee
           </p>
         </div>
       </div>
