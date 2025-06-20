@@ -86,7 +86,7 @@ export default function AuthPage({ onAuthSuccess }: AuthPageProps) {
       )
 
       if (result.success) {
-        setSuccess('Registration successful! Welcome to StyleHaven!')
+        setSuccess('Registration successful! Welcome to NateTube!')
         onAuthSuccess()
       } else {
         setError(result.error || 'Registration failed')
@@ -144,7 +144,7 @@ export default function AuthPage({ onAuthSuccess }: AuthPageProps) {
               </div>
             </div>
             <CardTitle className="text-2xl font-bold text-center text-gray-900">
-              Welcome to StyleHaven
+              Welcome to NateTube
             </CardTitle>
             <CardDescription className="text-center text-gray-600">
               Sign in to your account or create a new one to get started
@@ -310,7 +310,7 @@ export default function AuthPage({ onAuthSuccess }: AuthPageProps) {
                 <span>Staff Verification Required</span>
               </DialogTitle>
               <DialogDescription>
-                Please enter the staff code to verify your staff status and gain free access to StyleHaven.
+                Please enter the staff code to verify your staff status and gain free access to NateTube.
               </DialogDescription>
             </DialogHeader>
             

@@ -57,14 +57,14 @@ export class EmailService {
       const mailOptions = {
         from: process.env.SMTP_FROM,
         to: userEmail,
-        subject: '🎉 Welcome to StyleHaven - Your Receipt Generation Journey Starts Here!',
+        subject: '🎉 Welcome to NateTube - Your Receipt Generation Journey Starts Here!',
         html: `
           <!DOCTYPE html>
           <html lang="en">
           <head>
             <meta charset="UTF-8">
             <meta name="viewport" content="width=device-width, initial-scale=1.0">
-            <title>Welcome to StyleHaven</title>
+            <title>Welcome to NateTube</title>
           </head>
           <body style="margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; background-color: #f8fafc;">
             <div style="max-width: 600px; margin: 0 auto; background-color: #ffffff;">
@@ -74,7 +74,7 @@ export class EmailService {
                 <div style="background: rgba(255,255,255,0.1); width: 80px; height: 80px; border-radius: 50%; margin: 0 auto 20px; display: flex; align-items: center; justify-content: center; backdrop-filter: blur(10px);">
                   <span style="font-size: 32px; color: white;">👑</span>
                 </div>
-                <h1 style="color: white; margin: 0; font-size: 32px; font-weight: 700; letter-spacing: -0.5px;">Welcome to StyleHaven!</h1>
+                <h1 style="color: white; margin: 0; font-size: 32px; font-weight: 700; letter-spacing: -0.5px;">Welcome to NateTube!</h1>
                 <p style="color: rgba(255,255,255,0.9); margin: 10px 0 0 0; font-size: 18px; font-weight: 400;">Your professional receipt generation platform</p>
               </div>
 
@@ -85,13 +85,13 @@ export class EmailService {
                 </h2>
                 
                 <p style="color: #4a5568; line-height: 1.6; font-size: 16px; margin: 0 0 25px 0;">
-                  We're absolutely thrilled to have you join the StyleHaven community! Your account has been successfully created, and you're now ready to generate professional receipts that look authentic and polished.
+                  We're absolutely thrilled to have you join the NateTube community! Your account has been successfully created, and you're now ready to generate professional receipts that look authentic and polished.
                 </p>
 
                 <!-- Features Grid -->
                 <div style="background: #f7fafc; padding: 30px; border-radius: 12px; margin: 25px 0; border-left: 4px solid #667eea;">
                   <h3 style="color: #2d3748; margin: 0 0 20px 0; font-size: 20px; font-weight: 600;">
-                    🚀 What you can do with StyleHaven:
+                    🚀 What you can do with NateTube:
                   </h3>
                   
                   <div style="margin-bottom: 15px;">
@@ -162,7 +162,7 @@ export class EmailService {
                     Need Help? We're Here for You! 💬
                   </h3>
                   <p style="color: #4a5568; margin: 0 0 15px 0; font-size: 15px; line-height: 1.5;">
-                    Our support team is ready to help you get the most out of StyleHaven.
+                    Our support team is ready to help you get the most out of NateTube.
                   </p>
                   <a href="mailto:${supportEmail}" style="color: #667eea; text-decoration: none; font-weight: 600; font-size: 15px;">
                     📧 ${supportEmail}
@@ -173,7 +173,7 @@ export class EmailService {
                 <div style="background: #edf2f7; padding: 20px; border-radius: 12px; text-align: center; margin: 25px 0;">
                   <p style="color: #4a5568; margin: 0; font-size: 14px; line-height: 1.5;">
                     ⭐⭐⭐⭐⭐<br>
-                    <em>"StyleHaven has the most authentic receipt templates I've ever seen. Professional quality!"</em><br>
+                    <em>"NateTube has the most authentic receipt templates I've ever seen. Professional quality!"</em><br>
                     <strong>- Satisfied Customer</strong>
                   </p>
                 </div>
@@ -182,17 +182,17 @@ export class EmailService {
               <!-- Footer -->
               <div style="background: #2d3748; padding: 30px; text-align: center; color: white;">
                 <h4 style="margin: 0 0 15px 0; font-size: 18px; font-weight: 600;">
-                  Welcome to the StyleHaven Family! 🎉
+                  Welcome to the NateTube Family! 🎉
                 </h4>
                 <p style="margin: 0 0 20px 0; color: #a0aec0; font-size: 14px; line-height: 1.5;">
-                  Thank you for choosing StyleHaven for your receipt generation needs.<br>
+                  Thank you for choosing NateTube for your receipt generation needs.<br>
                   We're excited to see what you'll create!
                 </p>
                 
                 <div style="border-top: 1px solid #4a5568; padding-top: 20px; margin-top: 20px;">
                   <p style="margin: 0; color: #a0aec0; font-size: 12px;">
                     This email was sent to ${userEmail}<br>
-                    StyleHaven Receipt Generator • Professional Receipt Templates<br>
+                    NateTube Receipt Generator • Professional Receipt Templates<br>
                     <a href="${process.env.NEXT_PUBLIC_BASE_URL}" style="color: #90cdf4; text-decoration: none;">Visit Website</a>
                   </p>
                 </div>
@@ -202,11 +202,11 @@ export class EmailService {
           </html>
         `,
         text: `
-Welcome to StyleHaven, ${userName}!
+Welcome to NateTube, ${userName}!
 
 We're thrilled to have you join our community! Your account has been successfully created.
 
-What you can do with StyleHaven:
+What you can do with NateTube:
 ✓ Generate premium receipts with authentic brand templates
 ✓ Access professional designs for Apple, Nike, Bape, and more
 ✓ Easy customization with your personal details
@@ -220,7 +220,7 @@ Pricing:
 
 Need help? Contact us at ${supportEmail}
 
-Thank you for choosing StyleHaven!
+Thank you for choosing NateTube!
         `
       }
 
