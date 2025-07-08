@@ -42,7 +42,7 @@ export function usePayment() {
         success: false,
         data: null
       })
-      return
+      return { success: false, error: 'User not authenticated' }
     }
 
     setPaymentState(prev => ({ ...prev, isProcessing: true, error: null }))
@@ -67,13 +67,17 @@ export function usePayment() {
       const data = await response.json()
       
       if (data.success) {
+        // Refresh user data to get updated subscription status
         await refreshUser()
+        
         setPaymentState({
           isProcessing: false,
           error: null,
           success: true,
-          data: data
+          data: { paymentMethod: 'paypal', plan, amount, ...data }
         })
+        
+        return { success: true, data }
       } else {
         setPaymentState({
           isProcessing: false,
@@ -81,15 +85,21 @@ export function usePayment() {
           success: false,
           data: null
         })
+        
+        return { success: false, error: data.error || 'Payment processing failed' }
       }
     } catch (error: any) {
       console.error('PayPal payment processing error:', error)
+      const errorMessage = error.message || 'Payment processing failed'
+      
       setPaymentState({
         isProcessing: false,
-        error: error.message || 'Payment processing failed',
+        error: errorMessage,
         success: false,
         data: null
       })
+      
+      return { success: false, error: errorMessage }
     }
   }, [user, refreshUser])
 
@@ -105,7 +115,7 @@ export function usePayment() {
         success: false,
         data: null
       })
-      return
+      return { success: false, error: 'User not authenticated' }
     }
 
     setPaymentState(prev => ({ ...prev, isProcessing: true, error: null }))
@@ -132,65 +142,69 @@ export function usePayment() {
           isProcessing: false,
           error: null,
           success: true,
-          data: data.payment
+          data: data.payment || data
         })
+        
+        return { success: true, data: data.payment || data }
       } else {
         setPaymentState({
           isProcessing: false,
-          error: data.error || 'Payment initialization failed',
+          error: data.error || 'Crypto payment creation failed',
           success: false,
           data: null
         })
+        
+        return { success: false, error: data.error || 'Crypto payment creation failed' }
       }
     } catch (error: any) {
-      console.error('Crypto payment error:', error)
+      console.error('Crypto payment processing error:', error)
+      const errorMessage = error.message || 'Crypto payment creation failed'
+      
       setPaymentState({
         isProcessing: false,
-        error: error.message || 'Payment failed',
+        error: errorMessage,
         success: false,
         data: null
       })
+      
+      return { success: false, error: errorMessage }
     }
   }, [user])
 
   const checkCryptoPaymentStatus = useCallback(async (paymentId: string) => {
-    setPaymentState(prev => ({ ...prev, isProcessing: true }))
-
     try {
-      const response = await fetch(`/api/crypto/status/${paymentId}`)
+      const response = await fetch(`/api/crypto/status/${paymentId}`, {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('session_token')}`
+        }
+      })
+
       const data = await response.json()
       
       if (data.success) {
-        const isComplete = 
-          data.status === 'finished' || 
-          data.status === 'confirmed'
+        const status = data.status
         
-        if (isComplete) {
+        if (status === 'finished' || status === 'confirmed') {
+          // Refresh user data and mark payment as successful
           await refreshUser()
+          
+          setPaymentState({
+            isProcessing: false,
+            error: null,
+            success: true,
+            data: { paymentMethod: 'crypto', status, payment: data.payment }
+          })
         }
         
-        setPaymentState({
-          isProcessing: false,
-          error: null,
-          success: isComplete,
-          data: data.payment
-        })
-        
-        return data.status
+        return status
       } else {
-        setPaymentState(prev => ({
-          ...prev,
-          isProcessing: false,
-          error: data.error || 'Failed to check payment status'
-        }))
+        console.error('Failed to check payment status:', data.error)
+        return 'failed'
       }
     } catch (error: any) {
-      console.error('Error checking payment status:', error)
-      setPaymentState(prev => ({
-        ...prev,
-        isProcessing: false,
-        error: error.message || 'Failed to check payment status'
-      }))
+      console.error('Payment status check error:', error)
+      return 'failed'
     }
   }, [refreshUser])
 

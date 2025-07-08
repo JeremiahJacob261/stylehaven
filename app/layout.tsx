@@ -5,7 +5,7 @@ import { AuthProvider } from "@/contexts/AuthContext";
 import Script from "next/script";
 
 const inter = Inter({ subsets: ["latin"] });
- const PAYPAL_C_ID = "AQHGQldasFAyzij5nqhzUrDEjMQoha-t8aqNkcTplNA3SDVz7rj4aUKWB_ZXPagtZiABIZChXKfawleZ";
+ const PAYPAL_C_ID = process.env.PAYPAL_CLIENT_ID;
 export const metadata: Metadata = {
   title: "NateTube Receipt Generator",
   description: "Generate receipts to match your wins",

@@ -19,7 +19,8 @@ import {
   CreditCard,
   Zap,
   Calendar,
-  Star
+  Star,
+  CheckCircle
 } from 'lucide-react'
 
 interface PaymentPageProps {
@@ -57,6 +58,7 @@ export default function PaymentPage({ onPaymentSuccess }: PaymentPageProps) {
   const [paymentStatus, setPaymentStatus] = useState<string>('pending')
   const [timeLeft, setTimeLeft] = useState<number>(3600) // 1 hour in seconds
   const [selectedPlan, setSelectedPlan] = useState<'lifetime' | 'monthly'>('lifetime')
+  const [paypalProcessing, setPaypalProcessing] = useState(false)
   
   const paypalOneTimeRef = useRef<HTMLDivElement>(null)
   const paypalSubscriptionRef = useRef<HTMLDivElement>(null)
@@ -98,7 +100,9 @@ export default function PaymentPage({ onPaymentSuccess }: PaymentPageProps) {
       statusInterval = setInterval(async () => {
         const status = await checkCryptoPaymentStatus(cryptoPaymentData.payment_id)
         if (status === 'finished' || status === 'confirmed') {
-          onPaymentSuccess()
+          setTimeout(() => {
+            onPaymentSuccess()
+          }, 1500) // Small delay to show success state
         }
       }, 10000)
     }
@@ -107,7 +111,7 @@ export default function PaymentPage({ onPaymentSuccess }: PaymentPageProps) {
 
   // Watch for successful crypto payment creation and set the payment data
   useEffect(() => {
-    if (paymentState.success && paymentState.data && !cryptoPaymentData) {
+    if (paymentState.success && paymentState.data && !cryptoPaymentData && paymentState.data.paymentMethod !== 'paypal') {
       console.log('Setting crypto payment data:', paymentState.data)
       setCryptoPaymentData(paymentState.data)
       setTimeLeft(3600)
@@ -127,7 +131,7 @@ export default function PaymentPage({ onPaymentSuccess }: PaymentPageProps) {
             return actions.order.create({
               intent: "CAPTURE",
               purchase_units: [{
-                description: "NateTube Lifetime Access",
+                description: "StyleHaven Lifetime Access",
                 amount: {
                   currency_code: "USD",
                   value: PLAN_PRICES.lifetime.toString(),
@@ -136,20 +140,35 @@ export default function PaymentPage({ onPaymentSuccess }: PaymentPageProps) {
             })
           },
           onApprove: async (data: any, actions: any) => {
-            const order = await actions.order.capture()
-            await processPayPalPayment({
-              orderID: data.orderID,
-              payerID: data.payerID,
-              facilitatorAccessToken: data.facilitatorAccessToken,
-            }, 'lifetime', PLAN_PRICES.lifetime)
+            try {
+              setPaypalProcessing(true)
+              const order = await actions.order.capture()
+              
+              const result = await processPayPalPayment({
+                orderID: data.orderID,
+                payerID: data.payerID,
+                facilitatorAccessToken: data.facilitatorAccessToken,
+              }, 'lifetime', PLAN_PRICES.lifetime)
+
+              if (result.success) {
+                // Show success message briefly then redirect
+                setTimeout(() => {
+                  onPaymentSuccess()
+                }, 2000)
+              }
+            } catch (error) {
+              console.error("PayPal payment processing error:", error)
+              setPaypalProcessing(false)
+            }
           },
           onError: (err: any) => {
             console.error("PayPal error:", err)
+            setPaypalProcessing(false)
           },
         }).render(paypalOneTimeRef.current)
       }
 
-      // Monthly subscription button (simplified for demo)
+      // Monthly subscription button
       if (paypalSubscriptionRef.current && selectedPlan === 'monthly') {
         paypalSubscriptionRef.current.innerHTML = ''
         
@@ -158,7 +177,7 @@ export default function PaymentPage({ onPaymentSuccess }: PaymentPageProps) {
             return actions.order.create({
               intent: "CAPTURE",
               purchase_units: [{
-                description: "NateTube Monthly Subscription",
+                description: "StyleHaven Monthly Subscription",
                 amount: {
                   currency_code: "USD",
                   value: PLAN_PRICES.monthly.toString(),
@@ -167,28 +186,44 @@ export default function PaymentPage({ onPaymentSuccess }: PaymentPageProps) {
             })
           },
           onApprove: async (data: any, actions: any) => {
-            const order = await actions.order.capture()
-            await processPayPalPayment({
-              orderID: data.orderID,
-              payerID: data.payerID,
-              facilitatorAccessToken: data.facilitatorAccessToken,
-            }, 'monthly', PLAN_PRICES.monthly)
+            try {
+              setPaypalProcessing(true)
+              const order = await actions.order.capture()
+              
+              const result = await processPayPalPayment({
+                orderID: data.orderID,
+                payerID: data.payerID,
+                facilitatorAccessToken: data.facilitatorAccessToken,
+              }, 'monthly', PLAN_PRICES.monthly)
+
+              if (result.success) {
+                // Show success message briefly then redirect
+                setTimeout(() => {
+                  onPaymentSuccess()
+                }, 2000)
+              }
+            } catch (error) {
+              console.error("PayPal subscription payment processing error:", error)
+              setPaypalProcessing(false)
+            }
           },
           onError: (err: any) => {
             console.error("PayPal subscription error:", err)
+            setPaypalProcessing(false)
           },
         }).render(paypalSubscriptionRef.current)
       }
     }
-  }, [selectedPlan, processPayPalPayment])
+  }, [selectedPlan, processPayPalPayment, onPaymentSuccess])
 
-  // Handle payment success
+  // Handle PayPal payment success
   useEffect(() => {
-    if (paymentState.success && !paymentState.data) {
-      // This is for PayPal payments (no crypto data)
-      onPaymentSuccess()
+    if (paymentState.success && paymentState.data?.paymentMethod === 'paypal') {
+      // PayPal payment was successful, onPaymentSuccess will be called from the PayPal button handler
+      
+      setPaypalProcessing(false)
     }
-  }, [paymentState.success, paymentState.data, onPaymentSuccess])
+  }, [paymentState.success, paymentState.data])
 
   const formatTime = (seconds: number) => {
     const minutes = Math.floor(seconds / 60)
@@ -204,10 +239,37 @@ export default function PaymentPage({ onPaymentSuccess }: PaymentPageProps) {
     const amount = PLAN_PRICES[selectedPlan]
     console.log(`Initiating crypto payment for ${selectedCrypto} - $${amount}`)
     await processCryptoPayment(selectedCrypto, selectedPlan, amount)
-    // The useEffect will handle setting cryptoPaymentData when paymentState.success becomes true
   }
 
   const selectedCryptoData = availableCryptos.find(c => c.value === selectedCrypto)
+
+  // Show success message for PayPal
+  if (paymentState.success && paymentState.data?.paymentMethod === 'paypal') {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-green-50 to-blue-50 flex items-center justify-center p-4">
+        <div className="w-full max-w-md">
+          <Card className="shadow-xl border-0">
+            <CardContent className="p-8 text-center">
+              <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
+                <CheckCircle className="w-10 h-10 text-green-600" />
+              </div>
+              
+              <h1 className="text-2xl font-bold text-gray-900 mb-3">
+                Payment Successful! 🎉
+              </h1>
+              
+              <p className="text-gray-600 mb-6">
+                Your {paymentState.data.plan === 'lifetime' ? 'lifetime' : 'monthly'} subscription has been activated. 
+                Redirecting you to the dashboard...
+              </p>
+              
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-green-600 mx-auto"></div>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+    )
+  }
 
   // Crypto payment display
   if (cryptoPaymentData) {
@@ -221,7 +283,7 @@ export default function PaymentPage({ onPaymentSuccess }: PaymentPageProps) {
                 <span>Complete Payment</span>
               </CardTitle>
               <CardDescription className="text-orange-100">
-                Send {selectedCryptoData?.icon} {selectedCrypto.toUpperCase()} to complete your NateTube purchase
+                Send {selectedCryptoData?.icon} {selectedCrypto.toUpperCase()} to complete your StyleHaven purchase
               </CardDescription>
               {paymentStatus === 'waiting' && (
                 <Badge variant="secondary" className="mx-auto bg-white/20 text-white border-white/30">
@@ -315,7 +377,7 @@ export default function PaymentPage({ onPaymentSuccess }: PaymentPageProps) {
             <Crown className="w-10 h-10 text-white" />
           </div>
           <h1 className="text-4xl font-bold text-gray-900 mb-3">
-            Unlock NateTube Access
+            Unlock StyleHaven Access
           </h1>
           <p className="text-xl text-gray-600 max-w-2xl mx-auto">
             Choose your plan and start generating professional receipts with unlimited access to all features
@@ -492,7 +554,7 @@ export default function PaymentPage({ onPaymentSuccess }: PaymentPageProps) {
                     Pay safely with PayPal, credit card, or debit card. Your payment information is protected.
                   </p>
                   
-                  {paymentState.isProcessing && (
+                  {(paymentState.isProcessing || paypalProcessing) && (
                     <div className="bg-blue-50 p-4 rounded-lg mb-6 border border-blue-200">
                       <div className="flex items-center justify-center space-x-2">
                         <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-blue-600"></div>

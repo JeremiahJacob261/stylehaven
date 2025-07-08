@@ -230,12 +230,15 @@ export class AuthService {
     expiresAt: Date,
     paymentId?: string
   ): Promise<void> {
+    const expirationDate = new Date()
+    expirationDate.setDate(expirationDate.getDate() + 30) // 30 days from now
+    
     await supabase
       .from('users')
       .update({
         subscription_type: subscriptionType,
         subscription_status: subscriptionStatus,
-        subscription_expires_at: expiresAt.toISOString(),
+        subscription_expires_at: expirationDate.toISOString(),
         updated_at: new Date().toISOString()
       })
       .eq('id', userId)
