@@ -6,10 +6,10 @@ import { v4 as uuidv4 } from 'uuid'
 const JWT_SECRET = process.env.JWT_SECRET || 'your-super-secret-jwt-key'
 
 export interface User {
-  has_paid: any
   id: string
   email: string
   username: string
+  has_paid: boolean
   is_staff: boolean
   subscription_type: 'free' | 'monthly' | 'yearly'
   subscription_status: 'active' | 'inactive' | 'cancelled' | 'expired'
@@ -74,6 +74,7 @@ export class AuthService {
           email,
           username,
           is_staff,
+          has_paid
           subscription_type,
           subscription_status,
           subscription_expires_at,

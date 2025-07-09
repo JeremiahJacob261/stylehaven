@@ -220,8 +220,12 @@ export default function PaymentPage({ onPaymentSuccess }: PaymentPageProps) {
   useEffect(() => {
     if (paymentState.success && paymentState.data?.paymentMethod === 'paypal') {
       // PayPal payment was successful, onPaymentSuccess will be called from the PayPal button handler
-      
+
       setPaypalProcessing(false)
+
+      setTimeout(() => {
+        window.location.reload()
+      }, 3000)
     }
   }, [paymentState.success, paymentState.data])
 
