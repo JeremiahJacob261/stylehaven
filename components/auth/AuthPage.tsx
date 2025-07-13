@@ -8,7 +8,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
-import { AlertCircle, User, Mail, Lock, Shield, Crown } from 'lucide-react'
+import { AlertCircle, User, Mail, Lock, Shield, Crown, Eye, EyeOff } from 'lucide-react'
 import { useAuth } from '@/contexts/AuthContext'
 
 interface AuthPageProps {
@@ -20,6 +20,9 @@ export default function AuthPage({ onAuthSuccess }: AuthPageProps) {
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState<string | null>(null)
+  const [showPassword, setShowPassword] = useState(false)
+  const [showRegisterPassword, setShowRegisterPassword] = useState(false)
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false)
   
   // Staff code verification dialog state
   const [showStaffDialog, setShowStaffDialog] = useState(false)
@@ -28,7 +31,8 @@ export default function AuthPage({ onAuthSuccess }: AuthPageProps) {
   
   const [loginData, setLoginData] = useState({
     email: '',
-    password: ''
+    password: '',
+    rememberMe: false
   })
 
   const [registerData, setRegisterData] = useState({
@@ -36,7 +40,8 @@ export default function AuthPage({ onAuthSuccess }: AuthPageProps) {
     username: '',
     password: '',
     confirmPassword: '',
-    isStaff: false
+    isStaff: false,
+    rememberMe: false
   })
 
   const handleLogin = async (e: React.FormEvent) => {
@@ -45,7 +50,7 @@ export default function AuthPage({ onAuthSuccess }: AuthPageProps) {
     setError(null)
 
     try {
-      const result = await login(loginData.email, loginData.password)
+      const result = await login(loginData.email, loginData.password, loginData.rememberMe)
       
       if (result.success) {
         setSuccess('Login successful! Welcome back!')
@@ -82,7 +87,8 @@ export default function AuthPage({ onAuthSuccess }: AuthPageProps) {
         registerData.email,
         registerData.username,
         registerData.password,
-        registerData.isStaff
+        registerData.isStaff,
+        registerData.rememberMe
       )
 
       if (result.success) {
@@ -196,14 +202,32 @@ export default function AuthPage({ onAuthSuccess }: AuthPageProps) {
                       <Lock className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
                       <Input
                         id="login-password"
-                        type="password"
+                        type={showPassword ? "text" : "password"}
                         placeholder="Enter your password"
-                        className="pl-10"
+                        className="pl-10 pr-10"
                         value={loginData.password}
                         onChange={(e) => setLoginData({ ...loginData, password: e.target.value })}
                         required
                       />
+                      <button
+                        type="button"
+                        onClick={() => setShowPassword(!showPassword)}
+                        className="absolute right-3 top-3 h-4 w-4 text-gray-400 hover:text-gray-600"
+                      >
+                        {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                      </button>
                     </div>
+                  </div>
+
+                  <div className="flex items-center space-x-2">
+                    <Checkbox
+                      id="remember-me"
+                      checked={loginData.rememberMe}
+                      onCheckedChange={(checked) => setLoginData({ ...loginData, rememberMe: checked as boolean })}
+                    />
+                    <Label htmlFor="remember-me" className="text-sm text-gray-600">
+                      Stay signed in for up to 30 days
+                    </Label>
                   </div>
 
                   <Button type="submit" className="w-full" disabled={isLoading}>
@@ -252,13 +276,20 @@ export default function AuthPage({ onAuthSuccess }: AuthPageProps) {
                       <Lock className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
                       <Input
                         id="register-password"
-                        type="password"
+                        type={showRegisterPassword ? "text" : "password"}
                         placeholder="Enter your password"
-                        className="pl-10"
+                        className="pl-10 pr-10"
                         value={registerData.password}
                         onChange={(e) => setRegisterData({ ...registerData, password: e.target.value })}
                         required
                       />
+                      <button
+                        type="button"
+                        onClick={() => setShowRegisterPassword(!showRegisterPassword)}
+                        className="absolute right-3 top-3 h-4 w-4 text-gray-400 hover:text-gray-600"
+                      >
+                        {showRegisterPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                      </button>
                     </div>
                   </div>
 
@@ -268,14 +299,32 @@ export default function AuthPage({ onAuthSuccess }: AuthPageProps) {
                       <Lock className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
                       <Input
                         id="confirm-password"
-                        type="password"
+                        type={showConfirmPassword ? "text" : "password"}
                         placeholder="Confirm your password"
-                        className="pl-10"
+                        className="pl-10 pr-10"
                         value={registerData.confirmPassword}
                         onChange={(e) => setRegisterData({ ...registerData, confirmPassword: e.target.value })}
                         required
                       />
+                      <button
+                        type="button"
+                        onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                        className="absolute right-3 top-3 h-4 w-4 text-gray-400 hover:text-gray-600"
+                      >
+                        {showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                      </button>
                     </div>
+                  </div>
+
+                  <div className="flex items-center space-x-2">
+                    <Checkbox
+                      id="register-remember-me"
+                      checked={registerData.rememberMe}
+                      onCheckedChange={(checked) => setRegisterData({ ...registerData, rememberMe: checked as boolean })}
+                    />
+                    <Label htmlFor="register-remember-me" className="text-sm text-gray-600">
+                      Stay signed in for up to 30 days
+                    </Label>
                   </div>
 
                   <div className="flex items-center space-x-2 p-3 bg-amber-50 border border-amber-200 rounded-lg">

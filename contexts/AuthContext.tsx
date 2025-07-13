@@ -8,8 +8,8 @@ interface AuthContextType {
   loading: boolean
   signOut: () => Promise<void>
   refreshUser: () => Promise<void>
-  login: (email: string, password: string) => Promise<{ success: boolean; error?: string }>
-  register: (email: string, username: string, password: string, isStaff?: boolean) => Promise<{ success: boolean; error?: string }>
+  login: (email: string, password: string, rememberMe?: boolean) => Promise<{ success: boolean; error?: string }>
+  register: (email: string, username: string, password: string, isStaff?: boolean, rememberMe?: boolean) => Promise<{ success: boolean; error?: string }>
 }
 
 const AuthContext = createContext<AuthContextType>({
@@ -55,8 +55,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   }
 
-  const login = async (email: string, password: string) => {
-    const result = await AuthService.login(email, password)
+  const login = async (email: string, password: string, rememberMe: boolean = false) => {
+    const result = await AuthService.login(email, password, rememberMe)
     if (result.success && result.user && result.token) {
       setUser(result.user)
       localStorage.setItem('session_token', result.token)
@@ -64,8 +64,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     return result
   }
 
-  const register = async (email: string, username: string, password: string, isStaff: boolean = false) => {
-    const result = await AuthService.register(email, username, password, isStaff)
+  const register = async (email: string, username: string, password: string, isStaff: boolean = false, rememberMe: boolean = false) => {
+    const result = await AuthService.register(email, username, password, isStaff, rememberMe)
     if (result.success && result.user && result.token) {
       setUser(result.user)
       localStorage.setItem('session_token', result.token)

@@ -47,10 +47,15 @@ export class AuthService {
     }
   }
 
-  static async createSession(userId: string): Promise<string> {
+  static async createSession(userId: string, rememberMe: boolean = false): Promise<string> {
     const sessionToken = uuidv4()
     const expiresAt = new Date()
-    expiresAt.setDate(expiresAt.getDate() + 7) // 7 days
+    
+    if (rememberMe) {
+      expiresAt.setDate(expiresAt.getDate() + 30) // 30 days for "stay signed in"
+    } else {
+      expiresAt.setDate(expiresAt.getDate() + 7) // 7 days default
+    }
 
     await supabase
       .from('user_sessions')
@@ -74,7 +79,7 @@ export class AuthService {
           email,
           username,
           is_staff,
-          has_paid
+          has_paid,
           subscription_type,
           subscription_status,
           subscription_expires_at,
@@ -91,7 +96,7 @@ export class AuthService {
     return session.users as unknown as User
   }
 
-  static async register(email: string, username: string, password: string, isStaff: boolean = false): Promise<AuthResult> {
+  static async register(email: string, username: string, password: string, isStaff: boolean = false, rememberMe: boolean = false): Promise<AuthResult> {
     try {
       // Check if user exists
       const { data: existingUser } = await supabase
@@ -127,7 +132,7 @@ export class AuthService {
       }
 
       // Create session
-      const sessionToken = await this.createSession(user.id)
+      const sessionToken = await this.createSession(user.id, rememberMe)
 
       // Send welcome email
       try {
@@ -153,7 +158,6 @@ export class AuthService {
         token: sessionToken
       }
 
-
       
     } catch (error: any) {
       return { success: false, error: error.message }
@@ -163,7 +167,7 @@ export class AuthService {
   
   }
 
-  static async login(email: string, password: string): Promise<AuthResult> {
+  static async login(email: string, password: string, rememberMe: boolean = false): Promise<AuthResult> {
     try {
       // Get user
       const { data: user, error } = await supabase
@@ -183,7 +187,7 @@ export class AuthService {
       }
 
       // Create session
-      const sessionToken = await this.createSession(user.id)
+      const sessionToken = await this.createSession(user.id, rememberMe)
 
       return {
         success: true,
@@ -195,9 +199,9 @@ export class AuthService {
           has_paid: user.has_paid,
           payment_method: user.payment_method,
           email_verified: user.email_verified,
-          subscription_type: 'free',
-          subscription_status: 'active',
-          subscription_expires_at: null
+          subscription_type: user.subscription_type || 'free',
+          subscription_status: user.subscription_status || 'active',
+          subscription_expires_at: user.subscription_expires_at
         },
         token: sessionToken
       }
@@ -281,5 +285,35 @@ export class AuthService {
     }
 
     return false
+  }
+
+  /**
+   * Check if a user has admin/staff privileges
+   * @param userId - The user ID to check
+   * @returns Promise<boolean> - True if user is staff, false otherwise
+   */
+  static async isStaffUser(userId: string): Promise<boolean> {
+    const { data: user } = await supabase
+      .from('users')
+      .select('is_staff')
+      .eq('id', userId)
+      .single()
+
+    return user?.is_staff || false
+  }
+
+  /**
+   * Validate admin access for API routes
+   * @param sessionToken - The session token to validate
+   * @returns Promise<User | null> - User object if valid staff user, null otherwise
+   */
+  static async validateAdminAccess(sessionToken: string): Promise<User | null> {
+    const user = await this.validateSession(sessionToken)
+    
+    if (!user || !user.is_staff) {
+      return null
+    }
+
+    return user
   }
 }

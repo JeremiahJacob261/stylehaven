@@ -1,0 +1,88 @@
+// import { NextResponse } from 'next/server'
+// import type { NextRequest } from 'next/server'
+
+// export function middleware(request: NextRequest) {
+//   // Only protect admin routes
+//   if (request.nextUrl.pathname.startsWith('/admin')) {
+//     // Check for session token in cookies or headers
+//     const sessionToken = request.cookies.get('session_token')?.value || 
+//                          request.headers.get('authorization')?.replace('Bearer ', '')
+
+//     if (!sessionToken) {
+//       // Redirect to home page if no session token
+//       return NextResponse.redirect(new URL('/', request.url))
+//     }
+//   }
+
+//   return NextResponse.next()
+// }
+
+// export const config = {
+//   matcher: ['/admin/:path*']
+// }
+import { NextResponse } from 'next/server'
+// import type { NextRequest } from 'next/server'
+
+// export function middleware(request: NextRequest) {
+//   // Only protect admin routes
+//   if (request.nextUrl.pathname.startsWith('/admin')) {
+//     // Check for session token in cookies or headers
+//     const sessionToken = request.cookies.get('session_token')?.value || 
+//                          request.headers.get('authorization')?.replace('Bearer ', '')
+
+//     if (!sessionToken) {
+//       // Redirect to home page if no session token
+//       return NextResponse.redirect(new URL('/', request.url))
+//     }
+//   }
+
+//   return NextResponse.next()
+// }
+
+// export const config = {
+//   matcher: ['/admin/:path*']
+// }
+import { NextResponse } from 'next/server'
+// import type { NextRequest } from 'next/server'
+
+// export function middleware(request: NextRequest) {
+//   // Only protect admin routes
+//   if (request.nextUrl.pathname.startsWith('/admin')) {
+//     // Check for session token in cookies or headers
+//     const sessionToken = request.cookies.get('session_token')?.value || 
+//                          request.headers.get('authorization')?.replace('Bearer ', '')
+
+//     if (!sessionToken) {
+//       // Redirect to home page if no session token
+//       return NextResponse.redirect(new URL('/', request.url))
+//     }
+//   }
+
+//   return NextResponse.next()
+// }
+
+// export const config = {
+//   matcher: ['/admin/:path*']
+// }
+import { NextResponse } from 'next/server'
+// import type { NextRequest } from 'next/server'
+
+// export function middleware(request: NextRequest) {
+//   // Only protect admin routes
+//   if (request.nextUrl.pathname.startsWith('/admin')) {
+//     // Check for session token in cookies or headers
+//     const sessionToken = request.cookies.get('session_token')?.value || 
+//                          request.headers.get('authorization')?.replace('Bearer ', '')
+
+//     if (!sessionToken) {
+//       // Redirect to home page if no session token
+//       return NextResponse.redirect(new URL('/', request.url))
+//     }
+//   }
+
+//   return NextResponse.next()
+// }
+
+// export const config = {
+//   matcher: ['/admin/:path*']
+// }
